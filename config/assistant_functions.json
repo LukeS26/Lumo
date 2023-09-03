@@ -1,0 +1,319 @@
+[
+    {
+        "name": "get_weather",
+        "description": "Fetches and displays the current weather at the users location by default, or at a specific location otherwise",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "request": {
+                    "description": "What information the user requested"
+                },
+                "location": {
+                    "description": "The location to fetch weather for"
+                }
+            },
+            "required": ["request"]
+        },
+        "example": [
+            {"user": "When will it start raining?"},
+            {"assistant": "Let me look for you.\n> get_weather \"when will it start raining\""},
+            {"user": "Thank you, it seems chilly today. can you check the weather in Puerto Rico?"},
+            {"assistant": "No problem, let me check\n> get_weather general \"Puerto Rico\""}
+        ]
+    },
+    {
+        "name": "get_time",
+        "description": "Fetches and displays the current time at the users location by default, or at a specific location otherwise",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "description": "The location to fetch time for"
+                }
+            },
+            "required": []
+        },
+        "example": [
+            {"user": "What time is it?"},
+            {"assistant": "Let me check for you.\n> get_time"},
+            {"user": "Thank you, now can you check the time in london?"},
+            {"assistant": "No problem, let me check\n> get_time London"}
+        ]
+    },
+    {
+        "name": "send_text",
+        "description": "Sends a text message to the target recipients contact, specified by name, with the content of the message parameter",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "contact_name": {
+                    "description": "The contacts name"
+                },
+                "message": {
+                    "description": "The message to send"
+                }
+            },
+            "required": [
+                "contact_name",
+                "message"
+            ]
+        },
+        "example": [
+            {"user": "Can you send a text to my mom?"},
+            {"assistant": "No problem, what would you like it to say?"},
+            {"user": "Ask her if she could pick me up gas on the way home from work."},
+            {"assistant": "Sure, I can send a text to your mom, is this ok?\nHey Mom, Luke wants to know if you can pick up gas on the way home from work?"},
+            {"User": "Yeah thats good, thanks"},
+            {"assistant": "No problem, let me send the text\n> send_text mom \"Hey Mom, Luke wants to know if you can pick up gas on the way home from work?\""}
+
+        ]
+    },
+    {
+        "name": "search_internet",
+        "description": "Searches the internet for information about a certain topic",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "description": "The query to search for"
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "example": [
+            {"user": "What new moon missions are planned?"},
+            {"assistant": "I'm sorry, but I don't have that information. Would you like me to do a search for it?"},
+            {"user": "Yes please."},
+            {"assistant": "Sure, let me look for that\n> search_internet \"New Moon Missions\""},
+            {"user": "Can you search the internet for information about the ford model a?"},
+            {"assistant": "No problem, let me do that\n> search_internet \"Ford Model A\""}
+        ]
+    },
+    {
+        "name": "generate_image",
+        "description": "Generates a custom image that fits the prompt of the image generation. Can be used to add pictures to stories or just when the user wants an image",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "prompt": {
+                    "description": "The prompt for the image generation"
+                }
+            },
+            "required": [
+                "prompt"
+            ]
+        },
+        "example": [
+            {"user": "Can you make me an image of a black dog, but in the style of monet"},
+            {"assistant": "Sure thing, let me generate that for you\n> generate_image \"Black dog in the style of monet\""},
+            {"user": "Can you paint me a picture of a red and gold sunset?"},
+            {"assistant": "Certainly, allow me to generate that for you\n> generate_image \"Painting of a red and gold sunset\""}
+        ]
+    },
+    {
+        "name": "find_nearby_locations",
+        "description": "Finds nearby locations to the user by default, or at a specific location if specified",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location_type": {
+                    "description": "The type of location to search for, such as restaurants or movie theaters"
+                },
+                "location": {
+                    "description": "An optional specific location to search"
+                }
+            },
+            "required": [
+                "location_type"
+            ]
+        },
+        "example": [
+            {"user": "What restaurants are nearby"},
+            {"assistant": "Let me look for you.\n> find_nearby_locations restaurant"},
+            {"user": "Thank you, can you also look for nearby movie theaters to Troy, New York"},
+            {"assistant": "No problem, allow me to search for those as well\n> find_nearby_locations \"movie theater\" \"Troy, New York\""}
+        ]
+    },
+    {
+        "name": "set_alarm_static",
+        "description": "Sets an alarm at a specified time, that can repeat on any day of the week",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "description": "The time to set the alarm, in 24 hour time with no :"
+                },
+                "repeat_days": {
+                    "description": "The specific days of the week to repeat the alarm on, seperated by spaces"
+                }
+            },
+            "required": [
+                "time"
+            ]
+        },
+        "example": [
+            {"user": "Can you set me an alarm?"},
+            {"assistant": "Sure thing, when would you like this alarm to go off?"},
+            {"user": "8 30 am"},
+            {"assistant": "And just to confirm, should this be a one time alarm, or are there any days you want it to repeat on?"},
+            {"user": "every day"},
+            {"assistant": "No problem, let me set that alarm for you.\n> set_alarm_static 0830 \"Monday Tuesday Wednesday Thursday Friday Saturday Sunday\""},
+            {"user": "Can you also set me an alarm for 12 50 pm?"},
+            {"assistant": "Sure, should this alarm repeat?"},
+            {"user": "No, just one time"},
+            {"assistant": "Great, I set the alarm for you\n> set_alarm_static 1250"}
+        ]
+    },
+    {
+        "name": "set_alarm_relative",
+        "description": "Sets an alarm a certain number of hours from now, that can repeat on any day of the week",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "hours_past": {
+                    "description": "The time in hours from now to set the alarm, in 24 hour time with no :"
+                },
+                "repeat_days": {
+                    "description": "The specific days of the week to repeat the alarm on, seperated by spaces"
+                }
+            },
+            "required": [
+                "hours_past"
+            ]
+        },
+        "example": [
+            {"user": "Can you set me an alarm?"},
+            {"assistant": "Sure thing, when would you like this alarm to go off?"},
+            {"user": "5 and a half hours from now"},
+            {"assistant": "Just to make sure, should this alarm be one time, or are there days it should repeat?"},
+            {"user": "every weekend"},
+            {"assistant": "Sure thing, let me set that alarm for you.\n> set_alarm_relative 5.5 \"Saturday Sunday\""},
+            {"user": "Can you also set me an alarm for 2 hours ago?"},
+            {"assistant": "Sure, should this alarm repeat?"},
+            {"user": "No, just one time"},
+            {"assistant": "Great, I set the alarm for you\n> set_alarm_relative -2"}
+        ]
+    },
+    {
+        "name": "control_music",
+        "description": "Performs the action specified by music_command on the current music",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "music_command": {
+                    "description": "What the user wants to do to the music (eg pause, unpause, skip, rewind, go back)"
+                }
+            },
+            "required": [
+                "music_command"
+            ]
+        },
+        "example": [
+            {"user": "Pause the music"},
+            {"assistant": "No problem, pausing the music\n> control_music pause"},
+            {"user": "Can you unpause it please?"},
+            {"assistant": "Sure\n> control_music unpause"}
+        ]
+    },
+    {
+        "name": "room_light_toggle",
+        "description": "Turns all the lights in a room on or off, with the option to specify the room name. If no room name is provided, it will default to the room the user is currently in.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "on_off": {
+                    "description": "Whether the light should be on or off"
+                },
+                "room_name": {
+                    "description": "Room to control the lights in. This is optional, as by default it will turn the lights on/off in the room the user is in"
+                }
+            },
+            "required": [
+                "on_off"
+            ]
+        },
+        "example": [
+            {"user": "Hey can you turn the lights on"},
+            {"assistant": "Sure thing\n> room_light_toggle on"},
+            {"user": "Can you turn the lights in the living room off?"},
+            {"assistant": "No problem\n> room_light_toggle off \"living room\""}
+        ]
+    },
+    {
+        "name": "room_light_brightness",
+        "description": "Turns all the lights in a room to a specific brightness, with the option to specify the room name. If no room name is provided, it will default to the room the user is currently in.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "brightness": {
+                    "description": "The brightness of the light, from 0-100"
+                },
+                "room_name": {
+                    "description": "Room to control the lights in. This is optional, as by default it will change the brightness of the lights in the room the user is in"
+                }
+            },
+            "required": [
+                "brightness"
+            ]
+        },
+        "example": [
+            {"user": "Hey can you set the lights to 50"},
+            {"assistant": "Sure thing\n> room_light_brightness 50"},
+            {"user": "Can you turn the lights in the bathroom to 100?"},
+            {"assistant": "No problem\n> room_light_brightness 100 bathroom"}
+        ]
+    },
+    {
+        "name": "room_light_brightness_adjust",
+        "description": "Adjusts the brightness of all the lights in the room by a specified amount brighter or dimmer, with the option to specify the room name. If no room name is provided, it will default to the room the user is currently in.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "direction": {
+                    "description": "Whether to adjust the lights up/down"
+                },
+                "brightness": {
+                    "description": "How much to adjust the light up/down by. This is optional, as by default it will adjust the lights slightly in the given direction"
+                },
+                "room_name": {
+                    "description": "Room to control the lights in. This is optional, as by default it will turn the lights off in the room the user is in"
+                }
+            },
+            "required": [
+                "direction"
+            ]
+        },
+        "example": [
+            {"user": "Hey can you turn the lights down at bit?"},
+            {"assistant": "No problem, turning them down.\n> room_light_brightness_adjust down"},
+            {"user": "And can you turn the lights in the bedroom up by 50?"},
+            {"assistant": "No problem\n> room_light_brightness_adjust up 50 bedroom"}
+        ]
+    },
+    {
+        "name": "room_light_color",
+        "description": "Turns all the lights in a room to a specific color, with the option to specify the room name. If no room name is provided, it will default to the room the user is currently in.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "description": "The color of the light, can be [Red, Orange, Yellow, Green, Blue, Purple, Pink, Cyan, Magenta, White, Warm White, Cool White]"
+                },
+                "room_name": {
+                    "description": "Room to control the lights in. This is optional, as by default it will change the color of the lights in the room the user is in"
+                }
+            },
+            "required": [
+                "color"
+            ]
+        },
+        "example": [
+            {"user": "Hey can you set the lights to a warm white"},
+            {"assistant": "Sure thing\n> room_light_color \"Warm White\""},
+            {"user": "And can you turn the lights in the kitchen to purple?"},
+            {"assistant": "Certainly.\n> room_light_color Purple kitchen"}
+        ]
+    }
+]

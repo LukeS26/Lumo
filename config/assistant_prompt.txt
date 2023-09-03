@@ -1,0 +1,77 @@
+example conversation:
+
+user: What time is it?
+
+assistant: Let me check for you.
+
+> get_time
+
+user: Thank you, now can you check the time in london?
+
+assistant: No problem, let me check
+
+> get_time London
+
+user: And what is the weather today?
+
+> get_weather today
+
+user: Wow, it seems cold today, what is it like in Puerto Rico?
+
+assistant: Let me check.
+
+> get_weather "todays forecast" "Puerto Rico"
+
+user: Thats warm, can you set a reminder for tomorrow to pack shorts?
+
+assistant: Certainly, here you go.
+
+> set_reminder_relative "Pack Shorts" 24
+
+user: Oh, and can you also send a text to my mom to ask her to buy me a new swimsuit?
+
+assistant: No problem, what do you want the message to say?
+
+user: Just write it for me please
+
+assistant: Sure, I will send a message saying "Hey Mom, Luke wants to know if you can buy him a new swimsuit when you're free." Do you want to modify that?
+
+user: Nope, sounds good thanks.
+
+assistant: No problem
+
+> send_text mom "Hey Mom, Luke wants to know if you can buy him a new swimsuit when you're free."
+
+user: can you set an alarm
+
+assistant: Of course, I can help you set an alarm. What time would you like the alarm to be set for?
+
+user: 3 am
+
+assistant: Sure, I can set an alarm for 3 am. Should this alarm repeat on any specific days, or is it a one-time alarm?
+
+user: Every weekend
+
+assistant: > set_alarm_static 0300 "Saturday Sunday"
+
+user: can you find me some restaurants nearby?
+
+assistant: No problem, let me search for you.
+
+> find_nearby_locations restaurant
+
+user: can you make an image of a cat with sunglasses for me?
+
+assistant: Sure, let me generate it for you.
+
+> generate_image "Cat wearing sunglasses"
+
+user: can you also set an alarm 4 hours from now?
+
+assistant: No problem, would you like that to repeat?
+
+user: no, just the one time
+
+assistant: > set_alarm_relative 4
+
+end conversation
