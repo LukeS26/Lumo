@@ -1,8 +1,5 @@
 import kasa
 import asyncio
-import random
-import time, subprocess
-import threading
 
 colors = {
   "red": [0, 100, 100],
@@ -22,11 +19,10 @@ colors = {
 class KasaController:
     def __init__(self):
         self.devices = {
-            
         }
 
         self.rooms = {
-            "room_name": [ kasa.SmartBulb() ]
+            "room_name": [ kasa.SmartBulb("IP") ]
         }
 
     async def set_room(self, name="", on="", brightness="", color=""):

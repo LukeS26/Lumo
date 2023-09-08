@@ -39,10 +39,12 @@ class Server:
 
         if most_updated:
             resp = requests.get(f"{most_updated}:8001/request_all_data")
+            self.latest_update = time.time_ns()
 
             self.assistant.brain.saved_chats = resp.json()
 
     def update_all_servers(self, data):
+        self.latest_update = time.time_ns()
         for ip in self.ip_list.keys():
             requests.post(f"{ip}:8001/sync_data", json=jsonify(data))
     
@@ -50,6 +52,7 @@ class Server:
         return jsonify(self.assistant.brain.saved_chats)
     
     def sync_data(self):
+        self.latest_update = time.time_ns()
         self.assistant.brain.update_data(request.json)
 
     def get_all_devices(self, broadcast_ip="255.255.255.255", port=31415, timeout=2):

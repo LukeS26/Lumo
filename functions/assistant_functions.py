@@ -82,7 +82,7 @@ def send_text(twilio_client, contact_name, message):
 
 def get_weather(request):
     try:
-        response = requests.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&appid={api_credentials['openweathermap']['app_id']}&units={measurement_units}&exclude=minutely,alerts")
+        response = requests.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&appid={api_credentials['openweathermap']['appid']}&units={measurement_units}&exclude=minutely,alerts")
         
         forecast_info = { }
 
@@ -126,7 +126,7 @@ def get_weather_at(location, request):
     try:
         better_location = geolocator.geocode(location)
 
-        response = requests.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={better_location.latitude}&lon={better_location.longitude}&appid=api_credentials['openweathermap']['app_id']&units={measurement_units}&exclude=minutely,alerts")
+        response = requests.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={better_location.latitude}&lon={better_location.longitude}&appid={api_credentials['openweathermap']['appid']}&units={measurement_units}&exclude=minutely,alerts")
         
         forecast_info = { }
 

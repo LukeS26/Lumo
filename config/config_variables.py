@@ -42,5 +42,5 @@ enabled_features = {
 measurement_units = "imperial"
 
 contacts = {
-    "name": "number"
+    "name": "+11111111111"
 }

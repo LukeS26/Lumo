@@ -8,7 +8,6 @@ import functions.assistant_functions as assistant_functions
 from functions.kasa_controller import KasaController
 import assistant.text_classifier as text_classifier
 
-from server.server import Server
 from config.config_variables import api_credentials
 
 openai.api_key = api_credentials["openai"]["key"]
@@ -42,7 +41,7 @@ class Brain:
         while len(self.saved_chats) > (self.last_system_chat):
             self.saved_chats.pop(self.last_system_chat)
 
-    def makeRequest(self, messageBody, room_name, role="user", server:Server=None ):
+    def makeRequest(self, messageBody, room_name, role="user", server=None ):
         new_chats = []
 
         new_chats.append( {"role": role, "content": messageBody} )
