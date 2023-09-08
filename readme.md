@@ -44,4 +44,6 @@
         Please note that these details are not shared with any external service besides the single API that needs them.
   5. Launch the Assistant<br>
      Now the assistant can be launched.
-       - Run the command: ```py launcher.py```
+       - Run the following commands: <br>
+         ```cd Lumo```<br>
+       ```py .\launcher.py```
