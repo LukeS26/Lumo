@@ -7,12 +7,14 @@ import signal
 from assistant.assistant_manager import Assistant
 from central_server import CentralServer
 
+from config.config_variables import room as room_name
+
 class AssistantServer:
     def __init__(self):
         self.app = Flask(__name__)
         self.central_server_url = ""
         self.self_ip_address = self.get_ip_address()
-        self.assistant = Assistant(mode="audio", room="luke_bedroom", ext_req_url=self.central_server_url)
+        self.assistant = Assistant(mode="audio", room=room_name, ext_req_url=self.central_server_url)
 
         self.app.route("/update_address", methods=['POST'])(self.update_address)
         self.app.route("/music_control", methods=['POST'])(self.control_music)
