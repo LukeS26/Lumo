@@ -23,7 +23,7 @@
   
   A smooth installation experience is very important, and this is one of the features being actively improved. In the mean time, here are the instructions to install this project on your local machine.
   1. Make sure you have python and ffmpeg installed. <br>
-    The latest version of python is available here: https://www.python.org/downloads/
+    The latest version of python is available here: https://www.python.org/downloads/ <br>
     The latest version of ffmpeg is available here: https://ffmpeg.org/download.html
   2. Clone the repository to your local device. <br>
     This can be done in one of 2 ways: <br>
