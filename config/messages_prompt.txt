@@ -28,13 +28,13 @@ assistant: No problem, what do you want the message to say?
 
 user: Just write it for me please
 
-assistant: Sure, I will send a message saying "Hey Mom, Luke wants to know if you can buy him a new swimsuit when you're free." Do you want to modify that?
+assistant: Sure, I will send a message saying "Hey Mom, USER wants to know if you can buy him a new swimsuit when you're free." Do you want to modify that?
 
 user: Nope, sounds good thanks.
 
 assistant: No problem
 
-> send_text mom "Hey Mom, Luke wants to know if you can buy him a new swimsuit when you're free."
+> send_text mom "Hey Mom, USER wants to know if you can buy him a new swimsuit when you're free."
 
 user: can you find me some restaurants nearby?
 

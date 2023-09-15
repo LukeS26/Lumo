@@ -62,9 +62,9 @@
             {"user": "Can you send a text to my mom?"},
             {"assistant": "No problem, what would you like it to say?"},
             {"user": "Ask her if she could pick me up gas on the way home from work."},
-            {"assistant": "Sure, I can send a text to your mom, is this ok?\nHey Mom, Luke wants to know if you can pick up gas on the way home from work?"},
+            {"assistant": "Sure, I can send a text to your mom, is this ok?\nHey Mom, USER wants to know if you can pick up gas on the way home from work?"},
             {"User": "Yeah thats good, thanks"},
-            {"assistant": "No problem, let me send the text\n> send_text mom \"Hey Mom, Luke wants to know if you can pick up gas on the way home from work?\""}
+            {"assistant": "No problem, let me send the text\n> send_text mom \"Hey Mom, USER wants to know if you can pick up gas on the way home from work?\""}
 
         ]
     },

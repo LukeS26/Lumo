@@ -8,7 +8,7 @@ import functions.assistant_functions as assistant_functions
 from functions.kasa_controller import KasaController
 import assistant.text_classifier as text_classifier
 
-from config.config_variables import api_credentials
+from config.config_variables import api_credentials, name
 
 openai.api_key = api_credentials["openai"]["key"]
 
@@ -16,7 +16,7 @@ class Brain:
     def __init__(self):
         self.initial_prompt_dialog = open("./config/assistant_prompt.txt", "r").readlines()
 
-        self.initial_prompt = f"You are a household assistant AI named Lumo. When you receive a prompt, respond to it in a helpful way. In addition you are able to call simple commands so you have extra functionality. To run one of these commands, it is extremely important you include \"> command_name_here\" in your response. You do not know the current date. The user's name is Luke."
+        self.initial_prompt = f"You are a household assistant AI named Lumo. When you receive a prompt, respond to it in a helpful way. In addition you are able to call simple commands so you have extra functionality. To run one of these commands, it is extremely important you include \"> command_name_here\" in your response. You do not know the current date. The user's name is {name}."
 
         self.available_commands = json.load(open("./config/assistant_functions.json"))
 
