@@ -31,7 +31,9 @@
       - Click the green Code button and download the zip file.
   3. Install the required libraries: <br>
      At the moment this takes a long time, as I believe many of the requirements aren't necessary. This is one of the aspects of the install being worked on.
-       - Run the following command: ```pip install -r requirements.txt```
+       - Run the following commands:<br>
+       ```cd Lumo```<br>
+       ```pip install -r requirements.txt```<br>
   4. Open and modify the config_variables.py file: <br>
     This is by far the most complicated part of the setup, as it requires getting API keys for several services:
        - Twilio
@@ -46,5 +48,4 @@
   5. Launch the Assistant<br>
      Now the assistant can be launched.
        - Run the following commands: <br>
-         ```cd Lumo```<br>
        ```py .\launcher.py```
