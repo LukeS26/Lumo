@@ -6,7 +6,7 @@
 
 ## About ##
 
-  Lumo is an open-source, localhosted voice assistant similar to Alexa or Google Home. Currently it is capable of generally responding to information, searching wikipedia for information, sending text messages, getting the weather, finding nearby buisnesses, and much more. 
+  Lumo is an open source, privacy focused, and decentralized home assistant similar in function to Alexa or Google Home. It can send text messages, search wikipedia, generate images, control lights, and perform many other useful features.
 
 ## Goals ##
 
@@ -22,8 +22,9 @@
 ## Installation ##
   
   A smooth installation experience is very important, and this is one of the features being actively improved. In the mean time, here are the instructions to install this project on your local machine.
-  1. Make sure you have python installed. <br>
+  1. Make sure you have python and ffmpeg installed. <br>
     The latest version of python is available here: https://www.python.org/downloads/
+    The latest version of ffmpeg is available here: https://ffmpeg.org/download.html
   2. Clone the repository to your local device. <br>
     This can be done in one of 2 ways: <br>
       - Run the following command: ```git clone https://github.com/LukeS26/Lumo.git```
