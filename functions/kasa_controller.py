@@ -19,11 +19,10 @@ colors = {
 class KasaController:
     def __init__(self):
         self.devices = {
-            "AC": kasa.SmartPlug("192.168.1.161")
         }
 
         self.rooms = {
-            "luke_bedroom": [ kasa.SmartBulb("192.168.1.153") ]
+            "room_name": [ kasa.SmartBulb("IP") ]
         }
 
     async def set_room(self, name="", on="", brightness="", color=""):
