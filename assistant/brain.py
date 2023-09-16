@@ -34,6 +34,7 @@ class Brain:
         self.twilio_client = twilio.Client(api_credentials["twilio"]["sid"], api_credentials["twilio"]["auth_token"])
 
     def update_data(self, data):
+        data = json.loads(data)
         for row in data:
             self.saved_chats.append(row)
 
@@ -58,7 +59,7 @@ class Brain:
 
         chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.saved_chats+new_chats)
 
-        new_chats.append(chat_completion.choices[0].message)
+        self.saved_chats.append(chat_completion.choices[0].message)
 
         lines = chat_completion.choices[0].message.content.splitlines()
 

@@ -42,7 +42,7 @@ class Server:
             resp = requests.get(f"{most_updated}:8001/request_all_data")
             self.latest_update = time.time_ns()
 
-            self.assistant.brain.saved_chats = resp.json()
+            self.assistant.brain.saved_chats = json.loads(resp.json())
 
     def update_all_servers(self, data):
         self.latest_update = time.time_ns()
@@ -79,7 +79,7 @@ class Server:
                     parsed_response = response.split(",")
                     self.ip_list[addr[0]] = parsed_response[1]
 
-                    if parsed_response[2] > most_updated[0]:
+                    if int(parsed_response[2]) > most_updated[0]:
                         most_updated[0] = parsed_response[2]
                         most_updated[1] = addr[0]
                     
