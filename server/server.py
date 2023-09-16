@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 import requests
 import threading, signal
 import time
+import json
 
 from assistant.assistant_manager import Assistant
 
@@ -46,7 +47,7 @@ class Server:
     def update_all_servers(self, data):
         self.latest_update = time.time_ns()
         for ip in self.ip_list.keys():
-            requests.post(f"{ip}:8001/sync_data", json=jsonify(data))
+            requests.post(f"{ip}:8001/sync_data", json=json.dumps(data))
     
     def send_data(self):
         return jsonify(self.assistant.brain.saved_chats)
