@@ -55,6 +55,7 @@ class Server:
     def sync_data(self):
         self.latest_update = time.time_ns()
         self.assistant.brain.update_data(request.json)
+        return "Success"
 
     def get_all_devices(self, broadcast_ip="255.255.255.255", port=31415, timeout=2):
         buffer_size = 1024
