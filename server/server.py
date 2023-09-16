@@ -39,10 +39,10 @@ class Server:
         most_updated = self.get_all_devices()
 
         if most_updated:
-            resp = requests.get(f"{most_updated}:8001/request_all_data")
+            resp = requests.get(f"http://{most_updated}:8001/request_all_data")
             self.latest_update = time.time_ns()
 
-            self.assistant.brain.saved_chats = json.loads(resp.json())
+            self.assistant.brain.saved_chats = resp.json()
 
     def update_all_servers(self, data):
         self.latest_update = time.time_ns()
@@ -67,27 +67,26 @@ class Server:
 
         message = f"LumoDiscover,{self.assistant.room},{self.latest_update}"
 
+        most_updated = [0, ""]
+
         try:
             sock.sendto(message.encode(), (broadcast_ip, port))
-
-            most_updated = (0, "")
 
             while True:
                 try:
                     data, addr = sock.recvfrom(buffer_size)
                     response = data.decode()
                     parsed_response = response.split(",")
-                    self.ip_list[addr[0]] = parsed_response[1]
-
-                    if int(parsed_response[2]) > most_updated[0]:
-                        most_updated[0] = parsed_response[2]
+                    self.ip_list[addr[0]] = parsed_response[0]
+                    
+                    if int(parsed_response[1]) > most_updated[0]:
+                        most_updated[0] = int(parsed_response[1])
                         most_updated[1] = addr[0]
                     
                 except socket.timeout:
                     break  # No more responses
         finally:
             sock.close()
-
             return most_updated[1]
     
     def listen_for_devices(self):
