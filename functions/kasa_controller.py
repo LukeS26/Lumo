@@ -19,12 +19,22 @@ colors = {
   "cool_white": [210, 10, 100]
 }
 
+async def checkKasaBulbs(addr):
+    try:
+        bulb = await kasa.Discover.discover_single(addr)
+        name = bulb.alias.lower().replace(" ", "_").replace("'", "")
+        return (bulb, name)
+    except kasa.SmartDeviceException:
+        return (None, addr)
+
 class KasaController:
     def __init__(self):
         self.devices = {}
         self.rooms = {}
 
-        asyncio.run(self.discover())
+        self.loop = asyncio.get_event_loop()
+
+        self.loop.run_until_complete(self.discover())
 
     async def discover(self):
         with open("functions/smart_devices.json") as f:
@@ -35,19 +45,22 @@ class KasaController:
 
         kasa.TPLinkSmartHomeProtocol.DEFAULT_TIMEOUT = 1
         
-        for addr in json_data["lights"]["kasa"].copy():
-            print(addr)
-            try:
-                bulb = await kasa.Discover.discover_single(addr)
-                name = bulb.alias.lower().replace(" ", "_").replace("'", "")
-                room_guess = process.extractOne(name, self.rooms.keys())
+        bulb_discoveries = []
+
+        for addr in json_data["lights"]["kasa"]:
+            bulb_discoveries.append(checkKasaBulbs(addr))
+        
+        bulb_discoveries = await asyncio.gather(*bulb_discoveries)
+
+        for bulb, identifier in bulb_discoveries:
+            if bulb is None:
+                json_data["lights"]["kasa"].remove(identifier)
+            else:
+                room_guess = process.extractOne(identifier, self.rooms.keys())
                 if len(self.rooms) < 1 or room_guess[1] < 75: 
-                    self.rooms[name] = [bulb]
+                    self.rooms[identifier] = [bulb]
                 else:
                     self.rooms[room_guess[0]].append(bulb)
-            except kasa.SmartDeviceException:
-                json_data["lights"]["kasa"].remove(addr)
-                
 
         kasa.TPLinkSmartHomeProtocol.DEFAULT_TIMEOUT = 5
 
@@ -65,7 +78,6 @@ class KasaController:
                         self.rooms[room_guess[0]].append(device)
             else:
                 self.devices[device.alias] = device
-
 
         json_data["lights"]["kasa"] = list(json_data["lights"]["kasa"])
 
