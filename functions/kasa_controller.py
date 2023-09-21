@@ -84,8 +84,6 @@ class KasaController:
         with open("functions/smart_devices.json", 'w') as f:
             json.dump(json_data, f)
 
-        print(self.rooms)
-
     async def set_room(self, name="", on="", brightness="", color=""):
         name = name.lower().replace(" ", "_")
 
