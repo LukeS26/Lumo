@@ -19,11 +19,11 @@ colors = {
   "cool_white": [210, 10, 100]
 }
 
-async def checkKasaBulbs(addr):
+async def checkKasaDevice(addr):
     try:
-        bulb = await kasa.Discover.discover_single(addr)
-        name = bulb.alias.lower().replace(" ", "_").replace("'", "")
-        return (bulb, name)
+        device = await kasa.Discover.discover_single(addr)
+        name = device.alias.lower().replace(" ", "_").replace("'", "")
+        return (device, name)
     except kasa.SmartDeviceException:
         return (None, addr)
 
@@ -42,15 +42,21 @@ class KasaController:
         
         # Remove duplicate ip addresses
         json_data["lights"]["kasa"] = set(json_data["lights"]["kasa"])
+        json_data["devices"]["kasa"] = set(json_data["devices"]["kasa"])
 
         kasa.TPLinkSmartHomeProtocol.DEFAULT_TIMEOUT = 1
         
         bulb_discoveries = []
+        plug_discoveries = []
 
         for addr in json_data["lights"]["kasa"]:
-            bulb_discoveries.append(checkKasaBulbs(addr))
+            bulb_discoveries.append(checkKasaDevice(addr))
+        
+        for addr in json_data["devices"]["kasa"]:
+            plug_discoveries.append(checkKasaDevice(addr))
         
         bulb_discoveries = await asyncio.gather(*bulb_discoveries)
+        plug_discoveries = await asyncio.gather(*plug_discoveries)
 
         for bulb, identifier in bulb_discoveries:
             if bulb is None:
@@ -61,6 +67,12 @@ class KasaController:
                     self.rooms[identifier] = [bulb]
                 else:
                     self.rooms[room_guess[0]].append(bulb)
+
+        for plug, identifier in plug_discoveries:
+            if plug is None:
+                json_data["devices"]["kasa"].remove(identifier)
+            else:
+                self.devices[identifier] = plug
 
         kasa.TPLinkSmartHomeProtocol.DEFAULT_TIMEOUT = 5
 
@@ -78,11 +90,31 @@ class KasaController:
                         self.rooms[room_guess[0]].append(device)
             else:
                 self.devices[device.alias] = device
+                json_data["devices"]["kasa"].add(ip)
 
         json_data["lights"]["kasa"] = list(json_data["lights"]["kasa"])
+        json_data["devices"]["kasa"] = list(json_data["devices"]["kasa"])
 
         with open("functions/smart_devices.json", 'w') as f:
             json.dump(json_data, f)
+
+    async def set_plug(self, name="", on=""):
+        name = name.lower().replace(" ", "_")
+
+        closest_name = process.extractOne(name, self.devices.keys())
+
+        if closest_name[1] < 75:
+            return (404, "Device Not Found")
+    
+        device = self.devices[closest_name[0]]
+        
+        await device.update()
+
+        match on:
+            case "on":
+                await device.turn_on()
+            case "off":
+                await device.turn_off()
 
     async def set_room(self, name="", on="", brightness="", color=""):
         name = name.lower().replace(" ", "_")
@@ -106,10 +138,11 @@ class KasaController:
             elif brightness:
                 await bulb.set_brightness(int(brightness))
 
-            if on == "on":
-                await bulb.turn_on()
-            elif on=="off":
-                await bulb.turn_off()
+            match on:
+                case "on":
+                    await bulb.turn_on()
+                case "off":
+                    await bulb.turn_off()
             
             await bulb.update()
 
