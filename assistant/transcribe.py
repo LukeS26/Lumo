@@ -9,6 +9,8 @@ import signal
 
 from config.config_variables import api_credentials, enabled_features
 
+from pyannote.audio import Pipeline
+
 openai.api_key = api_credentials["openai"]["key"]
 
 # Original Code by Nik Stromberg - nikorasu85@gmail.com - MIT 2022 - copilot
@@ -25,6 +27,8 @@ class StreamHandler:
         self.Max_Threshold = max_threshold
         self.Mean_Threshold = mean_threshold
         self.EndBlocks = end_blocks
+
+        self.stored_voice= []
 
         self.start_transcription_time = None
 
@@ -68,6 +72,29 @@ class StreamHandler:
         try:
             if self.fileready:
                 with open("dictate.wav", "rb") as wav:
+                    import test
+                    from pydub import AudioSegment
+
+                    self.stored_voice
+                    
+                    if (enabled_features["speaker_diarization"]):
+
+                        
+
+                        pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization", use_auth_token=
+                                                        api_credentials["hugging_face"]["key"])
+                        diarization = pipeline("audio.wav")
+                        for turn, _, speaker in diarization.itertracks(yield_label=True):
+                            for stored in self.stored_voice:
+                             
+                                if (f"speaker_{speaker}"):
+                                    print(f"start={turn.start:.1f}s stop={turn.end:.1f}s speaker_{speaker}")
+                                    k = test.speaker_verify(stored, "audio.wav", 
+                                    f"start={turn.start:.1f}s",  f"stop={turn.end:.1f}s",)
+
+
+
+
                     if enabled_features["self_host_whisper"]:
                         segments, info = self.model.transcribe("dictate.wav", beam_size=5, initial_prompt=self.prompt)
 
