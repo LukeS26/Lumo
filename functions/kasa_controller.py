@@ -110,11 +110,10 @@ class KasaController:
         
         await device.update()
 
-        match on:
-            case "on":
-                await device.turn_on()
-            case "off":
-                await device.turn_off()
+        if on == "on":
+            await device.turn_on()
+        elif on == "off":
+            await device.turn_off()
 
     async def set_room(self, name="", on="", brightness="", color=""):
         name = name.lower().replace(" ", "_")
@@ -138,11 +137,10 @@ class KasaController:
             elif brightness:
                 await bulb.set_brightness(int(brightness))
 
-            match on:
-                case "on":
-                    await bulb.turn_on()
-                case "off":
-                    await bulb.turn_off()
+            if on == "on":
+                await bulb.turn_on()
+            elif on == "off":
+                await bulb.turn_off()
             
             await bulb.update()
 
