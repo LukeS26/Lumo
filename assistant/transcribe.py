@@ -74,24 +74,26 @@ class StreamHandler:
                 with open("dictate.wav", "rb") as wav:
                     import test
                     from pydub import AudioSegment
+                    from config_variables import distance_min
 
                     self.stored_voice
                     
                     if (enabled_features["speaker_diarization"]):
 
-                        
-
                         pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization", use_auth_token=
-                                                        api_credentials["hugging_face"]["key"])
-                        diarization = pipeline("audio.wav")
+                                                        api_credentials["hugging_face"]["diarization_key"])
+                        diarization = pipeline("dictate.wav")
                         for turn, _, speaker in diarization.itertracks(yield_label=True):
                             for stored in self.stored_voice:
                              
                                 if (f"speaker_{speaker}"):
-                                    print(f"start={turn.start:.1f}s stop={turn.end:.1f}s speaker_{speaker}")
-                                    k = test.speaker_verify(stored, "audio.wav", 
-                                    f"start={turn.start:.1f}s",  f"stop={turn.end:.1f}s",)
-
+                                    # print(f"start={turn.start:.1f}s stop={turn.end:.1f}s speaker_{speaker}")
+                                    k = test.speaker_verify("dictate.wav", stored, 
+                                    turn.start,  turn.end, 0, test.audio_file_length(stored))
+                                    if k > distance_min:
+                                        print("Same Speaker")
+                                    else: 
+                                        print("not the same Speaker")
 
 
 
