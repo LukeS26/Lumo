@@ -218,6 +218,29 @@
         ]
     },
     {
+        "name": "smart_device_toggle",
+        "description": "Turns a smart device on or off, chosen by the name of the device.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "on_off": {
+                    "description": "Whether the device should be on or off"
+                },
+                "room_name": {
+                    "description": "Name of the device"
+                }
+            },
+            "required": [
+                "on_off",
+                "room_name"
+            ]
+        },
+        "example": [
+            {"user": "Hey can you turn the AC off?"},
+            {"assistant": "Sure thing\n> smart_device_toggle off AC"}
+        ]
+    },
+    {
         "name": "room_light_toggle",
         "description": "Turns all the lights in a room on or off, with the option to specify the room name. If no room name is provided, it will default to the room the user is currently in.",
         "parameters": {
