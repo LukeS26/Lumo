@@ -15,11 +15,23 @@ openai.api_key = api_credentials["openai"]["key"]
 
 class MusicController:
     def __init__(self):
+        # The psutil process running ffplay
         self.music_player = None
-        self.current_song = 0
-        self.start_time = 0
-        self.lyric_index = 0
+        
+        self.player_lock = False
 
+        # The current song being played, as its id
+        self.current_song = 0
+       
+        # The current lyric of the song playing
+        self.lyric_index = 0
+        
+        # Variables for playback time calculation
+        self.pause_time = 0
+        self.paused_at = 0
+        self.seek_start = 0
+
+        # The dicts of artists, albums, and songs
         self.artists = json.load(open("./music/artists.json"))
         self.albums = json.load(open("./music/albums.json"))
         self.songs = json.load(open("./music/songs.json"))
@@ -28,19 +40,33 @@ class MusicController:
         self.played_list = []
         self.available_songs = []
 
+    # Gets the current playback time through the song. 
+    # To do so it takes the current time since the creation of the music player, and subtracts the amount of time it has been paused
+    # If the music is paused, then it uses the time it was paused at, instead of the current time, since in that case it won't be playing
     def get_play_time(self):
-        return (time.time_ns() - self.start_time) / 1000000000
+        if self.music_player is None:
+            return 0
+
+        if self.is_paused():
+            return (self.paused_at - self.music_player.create_time()) - self.pause_time + self.seek_start
+        else:
+            return (time.time() - self.music_player.create_time()) - self.pause_time + self.seek_start
 
     def is_paused(self):
-        return self.music_player.status() != "running"
+        try:
+            return self.music_player is None or self.music_player.status() != "running"
+        except psutil.NoSuchProcess:
+            return True
     
     def get_current_song(self):
         return self.played_list[self.current_song]
 
     def pause(self):
+        self.paused_at = time.time()
         self.music_player.suspend()
                 
     def unpause(self):
+        self.pause_time += time.time() - self.paused_at
         self.music_player.resume()
 
     def skip_songs(self, num):
@@ -49,6 +75,28 @@ class MusicController:
         self.music_player.kill()
         self.music_player = None
 
+    def seek(self, seconds):
+        if self.player_lock:
+            return
+
+        self.player_lock = True
+
+        self.pause_time = 0
+    
+        self.seek_start = min(max(0, self.get_play_time() + seconds), float(self.songs[self.get_current_song()]["duration"]))
+
+        self.lyric_index = 0
+
+        self.music_player.kill()
+
+        args = ["ffplay", "-autoexit", "-nodisp", "-ss", str(self.seek_start), self.songs[self.get_current_song()]["link"]]
+        self.music_player = psutil.Process(subprocess.Popen(
+            args=args,
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        ).pid)
+
     def play(self):
         if not (self.music_player is None):
             self.current_song = self.get_next_song(1)
@@ -56,10 +104,11 @@ class MusicController:
             if self.music_player.is_running():
                 self.music_player.kill()
         
-        self.start_time = time.time_ns()
+        self.pause_time = 0
+        self.seek_start = 0
         self.lyric_index = 0
 
-        args = ["ffplay", "-autoexit", "-nodisp", self.songs[self.played_list[self.current_song]]["link"]]
+        args = ["ffplay", "-autoexit", "-nodisp", self.songs[self.get_current_song()]["link"]]
         self.music_player = psutil.Process(subprocess.Popen(
             args=args,
             stdout=subprocess.PIPE,
@@ -123,8 +172,21 @@ class MusicController:
         self.current_song = self.get_next_song(0)
 
         while True:
-            self.play()
-            self.music_player.wait()
+            if not self.player_lock:
+                self.play() 
+            else:
+                self.player_lock = not self.music_player.is_running()
+
+            if not self.player_lock:
+                self.music_player.wait()
+
+    def lyric_loop(self):
+        while True:
+            if "lyrics" in self.songs[self.get_current_song()].keys() and not self.is_paused() and self.lyric_index < len(self.songs[self.get_current_song()]["lyrics"]) and self.get_play_time() > self.songs[self.get_current_song()]["lyrics"][self.lyric_index][1]:
+                print(self.songs[self.get_current_song()]["lyrics"][self.lyric_index][0])
+                self.lyric_index += 1
+
+            time.sleep(0.1)
 
 class MusicSetup:
     def __init__(self):
