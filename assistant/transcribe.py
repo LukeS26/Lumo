@@ -72,6 +72,29 @@ class StreamHandler:
         try:
             if self.fileready:
                 with open("dictate.wav", "rb") as wav:
+                    from assistant import speaker_verify as sv
+                    import os
+
+                    saved_voices = next(os.walk('../saved_voices'))[2]
+                    resembelence = 0
+                    s_index = 0
+                    index = 0
+
+                    for voice in saved_voices:
+                        check = sv.speaker_verify("dictate.wav", voice)
+                        if resembelence < check:
+                            resembelence = check
+                            s_index = index
+                        index+=1
+                        
+                    from config.config_variables import distance_min
+
+                    if (resembelence > distance_min):
+                        
+                        print("hello", saved_voices[index])
+
+
+                        """
                     import test
                     from pydub import AudioSegment
                     from config_variables import distance_min
@@ -94,21 +117,21 @@ class StreamHandler:
                                         print("Same Speaker")
                                     else: 
                                         print("not the same Speaker")
+                    """
+                        if enabled_features["self_host_whisper"]:
+                            segments, info = self.model.transcribe("dictate.wav", beam_size=5, initial_prompt=self.prompt)
 
-
-
-                    if enabled_features["self_host_whisper"]:
-                        segments, info = self.model.transcribe("dictate.wav", beam_size=5, initial_prompt=self.prompt)
-
-                        result = ""
-                        for segment in segments:
-                            result += segment.text
-                    else:
-                        result = openai.Audio.transcribe("whisper-1", wav, prompt=self.prompt)["text"]
+                            result = ""
+                            for segment in segments:
+                                result += segment.text
+                        else:
+                            result = openai.Audio.transcribe("whisper-1", wav, prompt=self.prompt)["text"]
+                        
+                        self.transcription_callback(result, self.start_transcription_time)
+                        self.start_transcription_time = None
+                        self.fileready = False
                     
-                    self.transcription_callback(result, self.start_transcription_time)
-                    self.start_transcription_time = None
-                    self.fileready = False
+
         except Exception as e:
             print(f"Error Transcribing: {e}")
 

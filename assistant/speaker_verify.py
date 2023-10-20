@@ -21,7 +21,7 @@ def speaker_verify(filepath_1, filepath_2):
 
     model2 = DeepSpeakerModel()
 
-    model2.m.load_weights('ResCNN_triplet_training_checkpoint_265.h5', by_name=True)
+    model2.m.load_weights('../ResCNN_triplet_training_checkpoint_265.h5', by_name=True)
 
     mfcc_001 = sample_from_mfcc(read_mfcc(filepath_1, SAMPLE_RATE), NUM_FRAMES)
     mfcc_002 = sample_from_mfcc(read_mfcc(filepath_2, SAMPLE_RATE), NUM_FRAMES)
@@ -30,3 +30,7 @@ def speaker_verify(filepath_1, filepath_2):
     predict_002 = model2.m.predict(np.expand_dims(mfcc_002, axis=0))
 
     return batch_cosine_similarity(predict_001, predict_002)
+
+def create_voice_profile():
+
+    write('dictate.wav', self.SampleRate, self.buffer)

@@ -1,0 +1,3 @@
+I spent a large amount of time trying to find out how to implement voice recognition, originally I used Pyannote for solely diarization but as time went on I realized I needed more.
+
+Originally the speaker embedding portion was going to be run through pyannote however, pyannote runs on an earlier version of torch which is not compatible. I have no idea if this also applies to the diarization but I swear to god I hope it does not. Now for embedding it relies upon Phillip Remy’s Deep Speaker: https://github.com/philipperemy/deep-speaker.
