@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spotify Web Playback SDK Quick Start</title>
+    <style>
+        .progressBar {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background-image: linear-gradient(to right, #252525 0%, #252525 0%, #cacaca 0%);
+        }
+
+        .songContainer {
+            width: 50%;
+            justify-content: center;
+            align-content: center;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .songContainer > * {
+            margin: 5px auto;
+        }
+
+        .songName {
+            font-size: 20px;
+            font-family: 'Trebuchet MS', sans-serif;
+            margin-left: 40px;
+        }
+
+        .artistName {
+            font-size: 16px;
+            font-family: 'Trebuchet MS', sans-serif;
+            margin-left: 60px;
+        }
+
+        button {
+            width: 40px;
+            height: 40px;
+            background: none;
+            border: none;
+        }
+
+        button > img {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        button > img:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="songContainer" id="songContainer">
+            <img id="albumImage" src="">
+            <div id="songName" class="songName"></div>
+            <div id="artistName" class="artistName"></div>
+            <div id="progressBar" class="progressBar"></div>
+            <div>
+                <button id="skipBackwards" alt="skip backwards"><img src="./skip-backward-fill.svg"></button>
+                <button id="togglePlay" alt="toggle play"><img id="playPauseImage" src="./play-fill.svg"></button>
+                <button id="skipForwards" alt="skip forwards"><img src="./skip-forward-fill.svg"></button>
+
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script>
+        let songPaused = true;
+        let songPosition = 0;
+        let songDuration = 0;
+
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            const token = 'BQD7sQzh9L6UErICdcVIq6Kqh88zgnda0e3Jl25i3ogME1H2s9xxQep76cgDm3THu3uaVi_2Wscjg8SJ2B6BHQ6_-VPgSpjEGaD4XKoZvt195Yr0C7fW-kV4I1ljKYRil36BrVqluIql2XrA09dx1kbInItIpfPXSr7oMpzPCiVLo_p64VEFDSehf8ILzGaZceW72y-vwHLqy1gvLmTXeO3x9S5RVG5A3K9NyJBQ18-svxpnJsde7Lw1aEq-dh3lmCjhBg1CPOwirRr-3aJfULyLW3FSneKr8wFACfO_Q8n82TheyVJVs9GxD3xYDc6CvbcaxZEeOCuahbsESw';
+            const player = new Spotify.Player({
+                name: 'Lumo - Room Name',
+                getOAuthToken: cb => { cb(token); },
+                volume: 0.5
+            });
+
+            // Ready
+            player.addListener('ready', ({ device_id }) => {
+                console.log('Ready with Device ID', device_id);
+            });
+
+            // Not Ready
+            player.addListener('not_ready', ({ device_id }) => {
+                console.log('Device ID has gone offline', device_id);
+            });
+
+            player.addListener('initialization_error', ({ message }) => {
+                console.error(message);
+            });
+
+            player.addListener('authentication_error', ({ message }) => {
+                console.error(message);
+            });
+
+            player.addListener('account_error', ({ message }) => {
+                console.error(message);
+            });
+
+            document.getElementById('togglePlay').onclick = function() {
+              player.togglePlay();
+            };
+
+            document.getElementById('skipBackwards').onclick = function() {
+              player.previousTrack();
+            };
+
+            document.getElementById('skipForwards').onclick = function() {
+              player.nextTrack();
+            };
+
+            player.addListener('player_state_changed', ({
+                paused,
+                position,
+                duration,
+                track_window: { current_track }
+            }) => {
+                songPosition = position;
+                songDuration = duration;
+                songPaused = paused;
+                const percentComplete = (position / duration) * 100;
+                const artists = [];
+
+                for (let artist of current_track["artists"]) {
+                    artists.push(artist["name"]);
+                }
+
+                document.getElementById("songName").innerText = `${current_track["name"]} - `;
+                document.getElementById("artistName").innerHTML = artists.join(" & ");
+                document.getElementById("progressBar").style.backgroundImage = `linear-gradient(to right, #252525 0%, #252525 ${percentComplete}%, #cacaca ${percentComplete}%)`; 
+                document.getElementById("playPauseImage").src = paused ? "./play-fill.svg" : "./pause-fill.svg";
+                document.getElementById("albumImage").src = current_track["album"]["images"][0]["url"];
+            });
+
+            function updateProgress() {
+                if(songDuration > 0 && !songPaused) {
+                    const percentComplete = (songPosition / songDuration) * 100;
+                    songPosition += 100;
+                    document.getElementById("progressBar").style.backgroundImage = `linear-gradient(to right, #252525 0%, #252525 ${percentComplete}%, #cacaca ${percentComplete}%)`; 
+                }
+            }
+
+            setInterval(updateProgress, 100); 
+
+            player.connect();
+        }
+    </script>
+</body>
+</html>

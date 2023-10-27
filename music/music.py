@@ -21,10 +21,12 @@ class MusicController:
         self.player_lock = False
 
         # The current song being played, as its id
-        self.current_song = 0
+        self.current_song = -1
        
         # The current lyric of the song playing
-        self.lyric_index = 0
+        self.lyric_index = -1
+
+        self.paused = False
         
         # Variables for playback time calculation
         self.pause_time = 0
@@ -40,6 +42,10 @@ class MusicController:
         self.played_list = []
         self.available_songs = []
 
+    def set_music_volume(self, volume):
+        # This is way more complicated then it has any right being
+        pass
+
     # Gets the current playback time through the song. 
     # To do so it takes the current time since the creation of the music player, and subtracts the amount of time it has been paused
     # If the music is paused, then it uses the time it was paused at, instead of the current time, since in that case it won't be playing
@@ -52,63 +58,70 @@ class MusicController:
         else:
             return (time.time() - self.music_player.create_time()) - self.pause_time + self.seek_start
 
+    # Method to check if the music_process isn't running. If the music process doesn't exist it also returns True
     def is_paused(self):
-        try:
-            return self.music_player is None or self.music_player.status() != "running"
-        except psutil.NoSuchProcess:
-            return True
-    
+        return self.paused
+
+    # Shortcut to return the id of the currently playing song
     def get_current_song(self):
         return self.played_list[self.current_song]
 
+    # Suspends the process, and tracks the time at which it was paused for calculating play time
     def pause(self):
-        self.paused_at = time.time()
         self.music_player.suspend()
+        self.paused_at = time.time()
+        self.paused = True
                 
-    def unpause(self):
-        self.pause_time += time.time() - self.paused_at
+    # Resumes the suspended process, and updates the total amount of time it was paused to subtract from the play time as needed
+    def unpause(self):        
         self.music_player.resume()
+        self.pause_time += time.time() - self.paused_at
+        self.paused = False
 
+    # Skips forwards or backwards by some number of songs
+    # To do this it first obtains a lock on the player, to prevent the music loop from starting the next song as soon as it kills the process
+    # It then gets the next song, num forward or back, and plays it
     def skip_songs(self, num):
+        if self.player_lock:
+            return
+
+        self.player_lock = True
+        
         self.current_song = self.get_next_song(num)
         
-        self.music_player.kill()
-        self.music_player = None
+        self.play()
 
+    # Seeks forwards or backwards by some number of seconds
+    # To do this it first obtains a lock on the player, to prevent the music loop from starting the next song as soon as it kills the process
+    # It then calculates the point at which to seek, clamping it between 0 and the song duration, and plays it
     def seek(self, seconds):
         if self.player_lock:
             return
 
         self.player_lock = True
-
-        self.pause_time = 0
     
-        self.seek_start = min(max(0, self.get_play_time() + seconds), float(self.songs[self.get_current_song()]["duration"]))
+        seek_time = min(max(0, self.get_play_time() + seconds), float(self.songs[self.get_current_song()]["duration"]))
 
-        self.lyric_index = 0
+        self.play(seek_time=seek_time)
 
-        self.music_player.kill()
-
-        args = ["ffplay", "-autoexit", "-nodisp", "-ss", str(self.seek_start), self.songs[self.get_current_song()]["link"]]
-        self.music_player = psutil.Process(subprocess.Popen(
-            args=args,
-            stdout=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        ).pid)
-
-    def play(self):
-        if not (self.music_player is None):
-            self.current_song = self.get_next_song(1)
-
-            if self.music_player.is_running():
-                self.music_player.kill()
+    # Begin the music_player process
+    # To begin the process, it resets kills the current music_player if it's running, and resets any variable needed
+    # It then creates the arg list, with a -ss starting point if it has a seek time provided
+    # It then starts the process, saving it to the music_player variable
+    def play(self, seek_time=0):
+        if not (self.music_player is None) and self.music_player.is_running():
+            self.music_player.kill()
         
         self.pause_time = 0
-        self.seek_start = 0
-        self.lyric_index = 0
+        self.seek_start = seek_time
+        self.lyric_index = -1
+        self.paused = False
 
-        args = ["ffplay", "-autoexit", "-nodisp", self.songs[self.get_current_song()]["link"]]
+        if seek_time > 0:
+            args = ["ffplay", "-autoexit", "-nodisp", "-ss", str(self.seek_start), self.songs[self.get_current_song()]["link"]]
+        else:
+            args = ["ffplay", "-autoexit", "-nodisp", self.songs[self.get_current_song()]["link"]]
+        
         self.music_player = psutil.Process(subprocess.Popen(
             args=args,
             stdout=subprocess.PIPE,
@@ -118,6 +131,9 @@ class MusicController:
 
         print(f"Now playing {self.songs[self.get_current_song()]['name']} by {self.songs[self.get_current_song()]['artist']}" )
 
+    # Method to calculate the song to play, based on how many forward or backwards it wants to go.
+    # if the new index would be above the length of the play list, it adds new songs to that list, and sets itself to the last index
+    # If it would be negative it becomes 0 instead
     def get_next_song(self, num):
         new_song_index = self.current_song + num
         if new_song_index >= len(self.played_list):
@@ -169,24 +185,52 @@ class MusicController:
         else:
             self.available_songs = list(self.songs.keys())
 
-        self.current_song = self.get_next_song(0)
-
         while True:
             if not self.player_lock:
-                self.play() 
+                self.current_song = self.get_next_song(1)
+                self.play()
             else:
                 self.player_lock = not self.music_player.is_running()
 
             if not self.player_lock:
                 self.music_player.wait()
 
+    def get_current_lyric (self):
+        current_song = self.get_current_song()
+        if "lyrics" not in self.songs[current_song].keys():
+            return (-1, "")
+
+        cur_play_time = self.get_play_time()
+        possible_lyrics = self.songs[current_song]["lyrics"]
+
+        for i, (_, lyric_time) in enumerate(possible_lyrics):
+            if cur_play_time < lyric_time:
+                if i > 0:
+                    return (i - 1, possible_lyrics[i - 1][0])
+                else:
+                    return (-1, "")
+        
+        if possible_lyrics:
+            return len(possible_lyrics) - 1, possible_lyrics[-1][0]
+
+        # No lyrics found
+        return (-1, "")
+        
+
     def lyric_loop(self):
         while True:
-            if "lyrics" in self.songs[self.get_current_song()].keys() and not self.is_paused() and self.lyric_index < len(self.songs[self.get_current_song()]["lyrics"]) and self.get_play_time() > self.songs[self.get_current_song()]["lyrics"][self.lyric_index][1]:
-                print(self.songs[self.get_current_song()]["lyrics"][self.lyric_index][0])
-                self.lyric_index += 1
-
             time.sleep(0.1)
+
+            index, lyric = self.get_current_lyric()
+
+            if index > self.lyric_index:
+                print(lyric)
+                self.lyric_index = index
+
+    def control_music(self):
+
+        return
+
 
 class MusicSetup:
     def __init__(self):
@@ -198,6 +242,8 @@ class MusicSetup:
         artists = {}
         albums = {}
         songs = {}
+
+        old_songs = json.load(open("./music/songs.json"))
 
         artist_list = next(os.walk("./music/music_library"))[1]
         
@@ -242,7 +288,6 @@ class MusicSetup:
                     artists[artist]["songs"].append(song_name)
                     albums[album]["songs"].append(song_name)
 
-
                     songs[song_name] = {
                         "name": song.replace(".mp3", ""),
                         "album": album,
@@ -251,8 +296,8 @@ class MusicSetup:
                         "duration": duration_re.search(str(output)).group(0)
                     }
 
-                    if do_lyrics:
-                        songs[song_name]["lyrics"] = self.generate_song_lyrics(song_name, song_link)
+                    if song_name in old_songs.keys():
+                        songs[song_name]["lyrics"] = old_songs[song_name]["lyrics"]
 
         with open("music/artists.json", 'w') as fp:
             json.dump(artists, fp)
@@ -262,6 +307,9 @@ class MusicSetup:
 
         with open("music/songs.json", 'w') as fp:
             json.dump(songs, fp)
+
+        if do_lyrics:
+            self.add_lyrics_to_songs()
 
     def add_lyrics_to_songs(self):
         with open("music/songs.json", 'rb') as fp:
@@ -291,3 +339,91 @@ class MusicSetup:
             lyrics.append((line["text"], line["start"]))
         
         return lyrics
+
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+import webbrowser
+
+scopes = [
+    "user-read-playback-state",
+    "user-modify-playback-state",
+    "user-read-currently-playing",
+    "app-remote-control",
+    "playlist-read-private",
+    "playlist-read-collaborative",
+    "playlist-modify-private",
+    "playlist-modify-public",
+    "user-follow-modify",
+    "user-follow-read",
+    "user-read-playback-position",
+    "user-top-read",
+    "user-read-recently-played",
+    "user-library-modify",
+    "user-library-read",
+    "user-read-email",
+    "user-read-private",
+    "streaming"
+]
+
+
+class SpotifyController:
+    def __init__(self):
+        self.spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(
+            client_id=api_credentials["spotify"]["client_id"],
+            client_secret=api_credentials["spotify"]["client_secret"],
+            redirect_uri="http://localhost:8002",
+            scope=scopes
+        ))
+
+        self.current_song = self.spotify.currently_playing()
+
+    def get_access_token(self, refresh_token=None):
+        if refresh_token is None:
+            token = self.spotify.auth_manager.get_access_token()
+        else:
+            token = self.spotify.auth_manager.refresh_access_token(refresh_token)
+
+        return (token["access_token"], token["refresh_token"])
+
+    def get_devices(self):
+        return self.spotify.devices()
+
+    def get_playlists(self):
+        user = self.spotify.current_user()
+
+        playlists = self.spotify.user_playlists(user=user["id"])["items"]
+
+        simple_playlists = {}
+
+        for playlist in playlists:
+            simple_playlists[playlist["name"]] = playlist["id"]
+
+        return simple_playlists
+
+    def pause(self):
+        devices = self.spotify.devices()["devices"]
+
+        self.spotify.pause_playback(device_id=devices[0]["id"])
+
+    def unpause(self):
+        devices = self.spotify.devices()["devices"]
+
+        self.spotify.start_playback(device_id=devices[0]["id"])
+
+    def skip_songs(self, num):
+        if num < 0:
+            for i in range(num):
+                self.spotify.previous_track()
+        elif num > 0:
+            for i in range(num):
+                self.spotify.next_track()
+        else:
+            self.spotify.seek_track(0)
+
+    def get_play_time(self):
+        song = self.spotify.currently_playing()
+        if not song is None:
+            self.current_song = song
+
+        if not self.current_song is None:
+            return self.current_song["progress_ms"] / 1000   
