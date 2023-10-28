@@ -68,6 +68,27 @@ class StreamHandler:
             else:
                 self.prevblock = indata.copy()
 
+    def record_callback(self, indata:np.ndarray, frames, time, status):
+        #zero_crossing_rate = np.sum(np.abs(np.diff(np.sign(indata)))) / (2 * indata.shape[0]) # threshold 20
+        # freq = np.argmax(np.abs(np.fft.rfft(indata[:, 0]))) * SampleRate / frames
+
+        if any(indata) and indata.max() > self.Max_Threshold and np.sqrt(np.mean(indata**2)) > (self.Mean_Threshold / 2):
+            if self.padding < 1: 
+                self.buffer = self.prevblock.copy()
+                self.start_transcription_time = datetime.utcnow()
+            self.buffer = np.concatenate((self.buffer, indata))
+            self.padding = self.EndBlocks
+        else:
+            self.padding -= 1
+            if self.padding > 1:
+                self.buffer = np.concatenate((self.buffer, indata))
+            elif self.padding < 1 < self.buffer.shape[0] > self.SampleRate: # if enough silence has passed, write to file.
+                self.running = False
+            elif self.padding < 0 < self.buffer.shape[0] < self.SampleRate: # if recording not long enough, reset buffer.
+                self.buffer = np.zeros((0,1))
+            else:
+                self.prevblock = indata.copy()
+
     def process(self):
         try:
             if self.fileready:
@@ -145,6 +166,16 @@ class StreamHandler:
             stream.close()
             self.running = True
     
+    def record(self, filename):
+        print("Listening...")
+        with sd.InputStream(channels=1, callback=self.record_callback, blocksize=int(self.SampleRate * self.BlockSize / 1000), samplerate=self.SampleRate) as stream:
+            while self.running: pass
+            
+
+        write(filename, self.SampleRate, self.buffer)
+        self.buffer = np.zeros((0,1))
+
+
     def calibrate(self, time=100):
         self.Max_Threshold = 0
         self.Mean_Threshold = 0
