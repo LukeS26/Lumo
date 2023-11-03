@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <tile>Lumo</tile> 
+    </head>
+
+<body>
+    <h1>About Lumo</h1>
+    <img src="logo (1).png" alt="Lumo" height="400" width="400"/>
+    <p><b>Lumo is an open source, pirvacy focused, and decentralized home assistant similar in function to Alexa or Google Home.</b></p>
+    <h2>Features:</h2>
+    <ol>
+        <li>Send text messages</li>
+        <li>Search Wikipedia</li>
+        <li>Generate images</li>
+        <li>Control lights</li>
+        <li>And many more!</li>
+    </ol>
+</body>
+
+<body>
+    <h1>How To Install Lumo</h1>
+    <img src="ffmpeg.webp" alt="ffmpeg" height="40" width="80" /> <img src="python.png" alt="python" height="40" width="80">
+    <p><b>Here are the instructions to install Lumo on your local machine:</b></p>
+    <ol>
+        <li>Make sure you have python and ffmpeg installed.</li>
+        <li>Clone the repository to your local device. This can be done in one of two ways:</li>
+        <ul>
+            <li>Run the following command: git clone https://github.com?LukeS26/Lumo.git</li>
+            <li>Click the green Code button and download the zip file</li>
+        </ul>
+        <li>Install the required libraries by running the following commands:</li>
+        <ul>
+            <li>cd Lumo</li>
+            <li>pip install -r requirements.txt</li>
+        </ul>
+        <li>Open and modify the config_variables.py file:
+            This is by far the most complicated part of the setup, as it requires getting API keys for several services:
+        <ul>
+            <li>Twilio</li>
+            <li>OpenAI</li>
+            <li>Eleven Labs</li>
+            <li>Google Search</li>
+            <li>Google Locations</li>
+            <li>Open Weather Map</li>
+        </ul>
+            After getting these keys, you can also specify your name, which room the assistant is set up in, your location, and your contact's names and phone numbers.
+        </li>
+        <li>Launch the assistant
+            Now the assistant can be launched.
+            <ul>
+                Run the following commands: py. \launcher.py
+            </ul>
+        </li>
+    </ol>
+</body>
+</html>
