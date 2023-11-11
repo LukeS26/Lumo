@@ -1,8 +1,6 @@
-from transcribe import StreamHandler;
-
 import random
 import os
-from config_variables.py import max_users
+from config.config_variables import max_users
 
 from mutagen.wave import WAVE
 import numpy as np
@@ -21,6 +19,7 @@ def audio_file_length(audio_file):
     length = int(audio_info.length) 
     return length
 
+# Original Sample Code from: Phillpperemy, developer of Deep-Spealer https://github.com/philipperemy/deep-speaker
 def speaker_verify(filepath_1, filepath_2):
     np.random.seed(123)
     random.seed(123)
@@ -36,23 +35,3 @@ def speaker_verify(filepath_1, filepath_2):
     predict_002 = model2.m.predict(np.expand_dims(mfcc_002, axis=0))
 
     return batch_cosine_similarity(predict_001, predict_002)
-
-"""
-def create_voice_profile():
-    num = 0
-    path = "../saved_voices"
-    directory_list = os.listdir()
-
-    for i in directory_list:
-        if ".wav" in i:
-            num += 1
-
-    if num >= max_users:
-        num = 0
-
-    file_name = "Saved_voice_" + num + ".wav"
-    
-    StreamHandler().record(file_name)
-    
-    os.rename("./" + file_name, path + file_name)
-"""

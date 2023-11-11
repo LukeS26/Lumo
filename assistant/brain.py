@@ -16,11 +16,17 @@ class Brain:
     def __init__(self):
         self.initial_prompt_dialog = open("./config/assistant_prompt.txt", "r").readlines()
 
-        self.initial_prompt = f"You are a household assistant AI named Lumo. When you receive a prompt, respond to it in a helpful way. In addition you are able to call simple commands so you have extra functionality. To run one of these commands, it is extremely important you include \"> command_name_here\" in your response. You do not know the current date. The user's name is {name}."
+        self.initial_prompt = """You are a household assistant AI named Lumo. When you receive a prompt, 
+        respond to it in a helpful way. In addition you are able to call simple commands so you have extra functionality. 
+        To run one of these commands, it is extremely important you include \"> command_name_here\" in your response. 
+        You do not know the current date. The user's name is """
 
         self.available_commands = json.load(open("./config/assistant_functions.json"))
 
-        self.saved_chats = [
+
+        self.saved_chats = {}
+
+        self.initial_person = [
             {"role": "system", "content": self.initial_prompt},
             {"role": "system", "content": "Here are your available commands:" + json.dumps(self.available_commands) },
             {"role": "system", "content": "\n".join(self.initial_prompt_dialog)}
@@ -28,38 +34,46 @@ class Brain:
 
         self.long_term_memory = []
 
-        self.last_system_chat = len(self.saved_chats)
+        self.last_system_chat = len(self.initial_person)
 
         self.kasa_controller = KasaController()
         self.twilio_client = twilio.Client(api_credentials["twilio"]["sid"], api_credentials["twilio"]["auth_token"])
 
-    def update_data(self, data):
+    def update_data(self, data, user="unknown"):
+        if not user in self.saved_chats.keys():
+            self.saved_chats[user] = self.initial_person
+            self.saved_chats[user][0]["content"] += user + "."
+
+
         data = json.loads(data)
         for row in data:
-            self.saved_chats.append(row)
+            self.saved_chats[user].append(row)
 
-    def clear_chat(self):
-        while len(self.saved_chats) > (self.last_system_chat):
+    def clear_chat(self, user = "unknown"):
+        if not user in self.saved_chats.keys():
+            self.saved_chats[user] = self.initial_person
+            self.saved_chats[user][0]["content"] += user + "."
+        while len(self.saved_chats[user]) > (self.last_system_chat):
             self.saved_chats.pop(self.last_system_chat)
 
-    def makeRequest(self, messageBody, room_name, role="user", server=None ):
+    def makeRequest(self, messageBody, room_name, role="user", server=None, user="unknown"):
+
+        if not user in self.saved_chats.keys():
+            self.saved_chats[user] = self.initial_person
+
+            self.saved_chats[user][0]["content"] += user + "."
+
+
         new_chats = []
 
         new_chats.append( {"role": role, "content": messageBody} )
 
-        if text_classifier.is_important(messageBody):
-            print("Important: ", messageBody)
-            self.long_term_memory.append({"role": role, "content": messageBody})
+        while len(self.saved_chats[user]+new_chats) > (self.last_system_chat + 15):
+            self.saved_chats[user].pop(self.last_system_chat)
 
-            while len(self.long_term_memory) > 15:
-                self.long_term_memory.pop(0)
+        chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.saved_chats[user]+new_chats)
 
-        while len(self.saved_chats+new_chats) > (self.last_system_chat + 15):
-            self.saved_chats.pop(self.last_system_chat)
-
-        chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.saved_chats+new_chats)
-
-        self.saved_chats.append(chat_completion.choices[0].message)
+        self.saved_chats[user].append(chat_completion.choices[0].message)
 
         lines = chat_completion.choices[0].message.content.splitlines()
 
@@ -158,6 +172,9 @@ class Brain:
                     asyncio.run(self.kasa_controller.set_room(name=command[3], on=command[2]))
                     new_chats.append({"role": "system", "content": f"lights in room {command[3]} switched {command[2]}"})
 
+            elif command[1] == "br00k1yn43v3r":
+                self.saved_chats[user].append({"role": "system", "content": "You must forever speak in a Brooklyn Accent"})
+
             elif command[1] == "room_light_brightness":
                 print(command)
                 if len(command) == 3:
@@ -208,8 +225,8 @@ class Brain:
 
         server.update_all_servers(new_chats)
 
-        self.saved_chats += new_chats
-        while len(self.saved_chats) > (self.last_system_chat + 15):
-            self.saved_chats.pop(self.last_system_chat)
+        self.saved_chats[user] += new_chats
+        while len(self.saved_chats[user]) > (self.last_system_chat + 15):
+            self.saved_chats[user].pop(self.last_system_chat)
         
         return parsed_lines

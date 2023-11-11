@@ -8,7 +8,7 @@ from PIL import Image
 
 import assistant.transcribe as transcribe
 from assistant.brain import Brain
-from config.config_variables import api_credentials
+from config.config_variables import api_credentials, name 
 
 elevenlabs.set_api_key(api_credentials["elevenlabs"]["key"])
 
@@ -42,7 +42,7 @@ class Assistant:
         elif self.mode in ["read", "text"]:
             while True:
                 text = input("User: ")
-                self.makeRequest(text)
+                self.makeRequest(text, name)
 
     async def read(self, text):
         print(f"{self.voice.capitalize()}: {text}")
@@ -56,8 +56,8 @@ class Assistant:
             
             elevenlabs.play(audio)
 
-    def makeRequest(self, text):
-        result = self.brain.makeRequest(text, self.room, server=self.server)
+    def makeRequest(self, text, identified_user):
+        result = self.brain.makeRequest(text, self.room, server=self.server, user=identified_user)
 
         for line in result:
             if line["role"] == "image":
@@ -69,11 +69,11 @@ class Assistant:
             else:
                 asyncio.run(self.read(line["content"]))
 
-    def audio_callback(self, text:str, start_transcription_time):
+    def audio_callback(self, text:str, start_transcription_time, identified_user:str):
         valid_start = "lumo" in text.lower()
         if valid_start or (start_transcription_time and self.last_valid_request and (start_transcription_time - self.last_valid_request < timedelta(seconds=15))):
             print(f"User: {text}")
-            self.makeRequest(text)
+            self.makeRequest(text, identified_user)
             self.last_valid_request = datetime.utcnow()
         else:
             print(f"User: (Fail)")
