@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
-# import whisper, os
-import time
+from faster_whisper import WhisperModel
 import numpy as np
 import sounddevice as sd
 from scipy.io.wavfile import write
 from datetime import datetime, timedelta
 import openai
 from typing import Callable
+import signal
 
-from config.config_variables import api_credentials
+from config.config_variables import api_credentials, enabled_features
 
 openai.api_key = api_credentials["openai"]["key"]
 
@@ -29,8 +28,8 @@ class StreamHandler:
 
         self.start_transcription_time = None
 
-        # Can also use a self hosted whisper model if you have enough ram
-        # self.model = whisper.load_model(f'{Model}{".en" if English else ""}')
+        if enabled_features["self_host_whisper"]:
+            self.model = WhisperModel("medium", device="cpu", compute_type="int8")
 
     def calibration_callback(self, indata, frames, time, status):
         if indata.max() > self.Max_Threshold:
@@ -69,18 +68,22 @@ class StreamHandler:
         try:
             if self.fileready:
                 with open("dictate.wav", "rb") as wav:
-                    result = openai.Audio.transcribe("whisper-1", wav, prompt=self.prompt)
+                    if enabled_features["self_host_whisper"]:
+                        segments, info = self.model.transcribe("dictate.wav", beam_size=5, initial_prompt=self.prompt)
+
+                        result = ""
+                        for segment in segments:
+                            result += segment.text
+                    else:
+                        result = openai.Audio.transcribe("whisper-1", wav, prompt=self.prompt)["text"]
                     
-                    #  Alternatively, run it on your own system:
-                    # self.model.transcribe('dictate.wav',fp16=False,language='en' if English else '',task='translate' if Translate else 'transcribe')
-                    
-                    self.transcription_callback(result["text"], self.start_transcription_time)
+                    self.transcription_callback(result, self.start_transcription_time)
                     self.start_transcription_time = None
                     self.fileready = False
         except Exception as e:
             print(f"Error Transcribing: {e}")
 
-    def listen(self, callback:Callable[[str, datetime], str], prompt:str=""):
+    def listen(self, callback:Callable[[str, datetime], None], prompt:str=""):
         self.transcription_callback = callback
         self.prompt = prompt
 

@@ -30,12 +30,7 @@ longitude = 0
 assistant_mode = "calibrate"
 
 enabled_features = {
-    "connect_from_anywhere": True,
-    "texting": True,
-    "weather": True,
-    "image_generation": True,
-    "location_search": True,
-    "wikipedia_search": True
+    "self_host_whisper": False
 }
 
 # imperial or metric
