@@ -197,6 +197,30 @@
         ]
     },
     {
+        "name": "remove_alarm_static",
+        "description": "Removes an existing one-time or repeating alarm",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "description": "The time which the alarm is set is to be removed, in 24 hour time with no :"
+                },
+                "repeat_days": {
+                    "description": "The specific days of the week the alarm to be removed is set, seperated by spaces"
+                }
+            },
+            "required": [
+                "time"
+            ]
+        },
+        "example": [
+            {"user": "Can you remove an alarm?"},
+            {"assistant": "Sure thing, which alarm would you like me to remove?"},
+            {"user": "8 30 am on Mondays and Thursdays"},
+            {"assistant": "Great, I'll remove the alarm for you\n> remove_alarm_static 0830 \"Monday Thursday\""}
+        ]
+    },
+    {
         "name": "control_music",
         "description": "Performs the action specified by music_command on the current music",
         "parameters": {

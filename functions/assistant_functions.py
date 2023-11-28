@@ -10,6 +10,7 @@ import wikipedia
 import json
 
 from config.config_variables import api_credentials, contacts, measurement_units, latitude, longitude
+import functions.alarm as alarm
 
 openai.api_key = api_credentials["openai"]["key"]
 
@@ -266,6 +267,88 @@ def find_nearby_locations(location_type, location=None):
         return locations
     except:
         return "Error, could not find locations"
+
+def set_alarm_static(time):
+    try:
+        time = int(time)
+        hour = time // 100
+        minute = time % 100
+
+        if (0 <= hour <= 23) and (0 <= minute <= 59):
+            # make sure the alarm about to be set doesn't already exist
+            for a in alarm.alarms_list:
+                if a == [hour, minute]:
+                    return f"Error, the alarm for {hour}:{minute} already exists"
+
+            alarm.alarms_list.append([hour, minute]) 
+            alarm.update_alarms()  
+
+        return f"Set an alarm for {hour}:{minute}"
+
+    except:
+        return f"Error, invalid time {time}. "
+    
+def set_alarm_static_at(time, repeat_days):
+    try:
+        time = int(time)
+        hour = time // 100
+        minute = time % 100
+
+        if (0 <= hour <= 23) and (0 <= minute <= 59):
+            # make sure the days requested are valid
+            for day in range(len(repeat_days)):
+                if repeat_days[day] not in days_of_week:
+                    break
+
+            # make sure the alarm about to be set doesn't already exist
+            for a in alarm.alarms_list:
+                if a == [hour, minute, repeat_days]:
+                    return f"Error, the alarm for {hour}:{minute} on {repeat_days} already exists"
+
+            alarm.alarms_list.append([hour, minute, repeat_days])
+            alarm.update_alarms()
+
+        return f"Set an alarm for {hour}:{minute} on {repeat_days}"
+
+    except:
+        return f"Error, invalid time {time} or repeating days '{repeat_days}'. " 
+
+def remove_alarm_static(time):
+    try:
+        time = int(time)
+        hour = time // 100
+        minute = time % 100
+
+        if (0 <= hour <= 23) and (0 <= minute <= 59):
+            for a in alarm.alarms_list:
+                if a == [hour, minute]:
+                    alarm.alarms_list.remove(a)
+                    alarm.update_alarms() 
+                    return f"Removed alarm for {hour}:{minute}"
+
+            return f"Error, no alarm for {hour}:{minute} exists"
+
+    except:
+        return f"Error, invalid time {time}. "
+
+def remove_alarm_static_at(time, repeat_days):
+    try:
+        time = int(time)
+        hour = time // 100
+        minute = time % 100
+
+        if (0 <= hour <= 23) and (0 <= minute <= 59):
+
+            for a in alarm.alarms_list:
+                if a == [hour, minute, repeat_days]:
+                    alarm.alarms_list.remove(a)
+                    alarm.update_alarms()  
+                    return f"Removed alarm for {hour}:{minute} on {repeat_days}"
+
+            return f"Error, no alarm for {hour}:{minute} on {repeat_days} exists"
+
+    except:
+        return f"Error, invalid time {time} or repeating days '{repeat_days}'. " 
 
 def wake_up():
     return f"Good morning. {get_weather('Get an overview of the upcoming weather over the next 12 hours')}"
