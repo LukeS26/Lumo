@@ -205,6 +205,30 @@ class Brain:
                 new_chats.append({"role": "system", "content": f"Setting music to {' '.join(command[2:])}"})
                 parsed_lines.append({"role": "music", "content": " ".join(command[2:]) })
 
+            elif command[1] == "set_alarm_static": 
+                print(command)
+                if len(command) == 3:
+                    # one-time alarm
+                    result = {"role": "system", "content": assistant_functions.set_alarm_static(command[2])}
+                    new_chats.append(result)
+
+                if len(command) == 4:
+                    # repeating alarm
+                    result = {"role": "system", "content": assistant_functions.set_alarm_static_at(command[2], command[3])}
+                    new_chats.append(result)
+
+            elif command[1] == "remove_alarm_static":
+                print(command)
+                if len(command) == 3:
+                    # one-time alarm
+                    result = {"role": "system", "content": assistant_functions.remove_alarm_static(command[2])}
+                    new_chats.append(result)
+
+                if len(command) == 4:
+                    # repeating alarm
+                    result = {"role": "system", "content": assistant_functions.remove_alarm_static_at(command[2], command[3])}
+                    new_chats.append(result)
+
             else:
                 print(command)
                 result = {"role": "assistant", "content": line}
