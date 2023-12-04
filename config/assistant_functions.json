@@ -197,6 +197,30 @@
         ]
     },
     {
+        "name": "remove_alarm_static",
+        "description": "Removes an existing one-time or repeating alarm",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "description": "The time which the alarm is set is to be removed, in 24 hour time with no :"
+                },
+                "repeat_days": {
+                    "description": "The specific days of the week the alarm to be removed is set, seperated by spaces"
+                }
+            },
+            "required": [
+                "time"
+            ]
+        },
+        "example": [
+            {"user": "Can you remove an alarm?"},
+            {"assistant": "Sure thing, which alarm would you like me to remove?"},
+            {"user": "8 30 am on Mondays and Thursdays"},
+            {"assistant": "Great, I'll remove the alarm for you\n> remove_alarm_static 0830 \"Monday Thursday\""}
+        ]
+    },
+    {
         "name": "control_music",
         "description": "Performs the action specified by music_command on the current music",
         "parameters": {
@@ -215,6 +239,29 @@
             {"assistant": "No problem, pausing the music\n> control_music pause"},
             {"user": "Can you unpause it please?"},
             {"assistant": "Sure\n> control_music unpause"}
+        ]
+    },
+    {
+        "name": "smart_device_toggle",
+        "description": "Turns a smart device on or off, chosen by the name of the device.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "on_off": {
+                    "description": "Whether the device should be on or off"
+                },
+                "room_name": {
+                    "description": "Name of the device"
+                }
+            },
+            "required": [
+                "on_off",
+                "room_name"
+            ]
+        },
+        "example": [
+            {"user": "Hey can you turn the AC off?"},
+            {"assistant": "Sure thing\n> smart_device_toggle off AC"}
         ]
     },
     {
