@@ -19,7 +19,7 @@ def audio_file_length(audio_file):
     length = int(audio_info.length) 
     return length
 
-# Original Sample Code from: Phillpperemy, developer of Deep-Spealer https://github.com/philipperemy/deep-speaker
+# Original Sample Code from: Phillpperemy, developer of Deep-Speaker https://github.com/philipperemy/deep-speaker
 def speaker_verify(filepath_1, filepath_2):
     np.random.seed(123)
     random.seed(123)

@@ -164,7 +164,7 @@ class StreamHandler:
             self.running = True
     
     def record(self, filename):
-        print("Listening...")
+        print("Recording...")
         with sd.InputStream(channels=1, callback=self.record_callback, blocksize=int(self.SampleRate * self.BlockSize / 1000), samplerate=self.SampleRate) as stream:
             while self.running: pass
             

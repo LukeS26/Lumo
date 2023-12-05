@@ -72,11 +72,11 @@ def speaker_verify_2_0(filepath_1, filepath_2):
 
 def main():
     #TESTING PURPOSES ONLY
-    t = audio_file_length("DID YOU BREAK YOUR LEGS.wav")
-    r = audio_file_length("jerma_schizo.wav")
+    t = audio_file_length("./saved_voices/saved_voice_3.wav")
+    r = audio_file_length("./saved_voices/saved_voice_5.wav")
     print(t, " " ,r)
 
-    print(speaker_verify_2_0("./DID YOU BREAK YOUR LEGS.wav", "./jerma_schizo.wav"))
+    print(speaker_verify_2_0("./saved_voices/saved_voice_3.wav", "./saved_voices/saved_voice_5.wav"))
 
 if __name__ == "__main__":
     main()

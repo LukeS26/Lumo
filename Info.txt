@@ -1,3 +1,17 @@
-I spent a large amount of time trying to find out how to implement voice recognition, originally I used Pyannote for solely diarization but as time went on I realized I needed more.
+The Speaker Recognition Riles on a different open source project called Deep-speaker. The code is able
+to recognize voices and differietante between them. your conversation will be associated with your
+voice.
 
-Originally the speaker embedding portion was going to be run through pyannote however, pyannote runs on an earlier version of torch which is not compatible. I have no idea if this also applies to the diarization but I swear to god I hope it does not. Now for embedding it relies upon Phillip Remy’s Deep Speaker: https://github.com/philipperemy/deep-speaker.
+To create a voice run the store_voice.py. Type in your name. When the program outputs "Recording..."
+speak to record your voice. It's prefered to record your voice in a room without any outside noise.
+The longer you speak the more accurate it will be, but the longer the program will have to run.
+
+You can edit the distance min in config.py. Higher values let the program discard more false positives
+but discard true positves as well. Lower values let the program keep more true positves, but keep more
+false postives.
+
+To Future Lumo Developers the Diarization code is commeted and still available so if you wish to fix
+or implement speaker diarization you may use that. The code was written with pyannote in mind with a
+previous version of forge so you will have to get around that.
+
+Deep Speaker: https://github.com/philipperemy/deep-speaker.

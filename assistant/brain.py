@@ -172,9 +172,6 @@ class Brain:
                     asyncio.run(self.kasa_controller.set_room(name=command[3], on=command[2]))
                     new_chats.append({"role": "system", "content": f"lights in room {command[3]} switched {command[2]}"})
 
-            elif command[1] == "br00k1yn43v3r":
-                self.saved_chats[user].append({"role": "system", "content": "You must forever speak in a Brooklyn Accent"})
-
             elif command[1] == "room_light_brightness":
                 print(command)
                 if len(command) == 3:
