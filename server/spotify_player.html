@@ -77,7 +77,7 @@
         let songDuration = 0;
 
         window.onSpotifyWebPlaybackSDKReady = () => {
-            const token = 'BQD7sQzh9L6UErICdcVIq6Kqh88zgnda0e3Jl25i3ogME1H2s9xxQep76cgDm3THu3uaVi_2Wscjg8SJ2B6BHQ6_-VPgSpjEGaD4XKoZvt195Yr0C7fW-kV4I1ljKYRil36BrVqluIql2XrA09dx1kbInItIpfPXSr7oMpzPCiVLo_p64VEFDSehf8ILzGaZceW72y-vwHLqy1gvLmTXeO3x9S5RVG5A3K9NyJBQ18-svxpnJsde7Lw1aEq-dh3lmCjhBg1CPOwirRr-3aJfULyLW3FSneKr8wFACfO_Q8n82TheyVJVs9GxD3xYDc6CvbcaxZEeOCuahbsESw';
+            const token = 'BQDz34S8bL_qssnMr1Hor2DHSOOtJGqYqvJXW4QlAyq9fqFUkx0nJaCtgxHBlyXfQT7rlNk-8TIHF45_6UphFjSnK4yxFkSC4IQmUAdSESZSGJhX32No1noah-_E4VPCJHwQe1DEZ8LZ-kgV9_90EFfYrKoKCKBI9pq_AGiE93_iXEEcN1BHFpZ3OVMqCZ3emVKsk2a0KCVeRIf5rjpRLj5uQemR';
             const player = new Spotify.Player({
                 name: 'Lumo - Room Name',
                 getOAuthToken: cb => { cb(token); },

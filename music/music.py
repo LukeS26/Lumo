@@ -1,4 +1,4 @@
-import threading
+import threading, signal
 import subprocess
 import json
 import psutil
@@ -41,6 +41,15 @@ class MusicController:
         self.used_songs = []
         self.played_list = []
         self.available_songs = []
+
+        threading.Thread(target=self.music_loop, name="music_loop").start()
+        threading.Thread(target=self.lyric_loop, name="lyric_loop").start()
+        
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+        while self.music_player is None:
+            pass
+        self.pause()
 
     def set_music_volume(self, volume):
         # This is way more complicated then it has any right being
@@ -227,10 +236,32 @@ class MusicController:
                 print(lyric)
                 self.lyric_index = index
 
-    def control_music(self):
+    def control_music(self, command):
+        if  "pause" in command or "stop" in command:
+            self.pause()()
+            return f"Music paused. Current song: {self.songs[self.get_current_song()]['name']}"
+        elif "unpause" in command or "resume" in command or "play" in command:
+            self.unpause()
+            return f"Music resumed. Current song: {self.songs[self.get_current_song()]['name']}"
+        elif "rewind" in command or "restart" in command:
+            self.skip_songs(0)
+            return f"Song rewound. Current song: {self.songs[self.get_current_song()]['name']}"
+        elif "back" in command or "previous" in command:
+            num = -1
+            for word in command:
+                if word.isdigit():
+                    num = -1 * int(word)
+            self.skip_songs(num)
+            return f"Went back {num} songs. Current song: {self.songs[self.get_current_song()]['name']}"
+        elif "next" in command or "forward" in command or "skip" in command:
+            num = 1
+            for word in command:
+                if word.isdigit():
+                    num = int(word)
+            self.skip_songs(num)
+            return f"Skipped ahead {num} songs. Current song: {self.songs[self.get_current_song()]['name']}"
 
-        return
-
+        return f"Unknown command: {command}"
 
 class MusicSetup:
     def __init__(self):
