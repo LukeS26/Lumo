@@ -6,6 +6,7 @@ import twilio.rest as twilio
 
 import functions.assistant_functions as assistant_functions
 from functions.kasa_controller import KasaController
+from music.music import MusicController
 import assistant.text_classifier as text_classifier
 
 from config.config_variables import api_credentials, name
@@ -30,8 +31,10 @@ class Brain:
 
         self.last_system_chat = len(self.saved_chats)
 
+        self.music_controller = MusicController()
         self.kasa_controller = KasaController()
         self.twilio_client = twilio.Client(api_credentials["twilio"]["sid"], api_credentials["twilio"]["auth_token"])
+        
 
     def update_data(self, data):
         data = json.loads(data)
@@ -47,19 +50,10 @@ class Brain:
 
         new_chats.append( {"role": role, "content": messageBody} )
 
-        if text_classifier.is_important(messageBody):
-            print("Important: ", messageBody)
-            self.long_term_memory.append({"role": role, "content": messageBody})
-
-            while len(self.long_term_memory) > 15:
-                self.long_term_memory.pop(0)
-
         while len(self.saved_chats+new_chats) > (self.last_system_chat + 15):
             self.saved_chats.pop(self.last_system_chat)
 
         chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.saved_chats+new_chats)
-
-        self.saved_chats.append(chat_completion.choices[0].message)
 
         lines = chat_completion.choices[0].message.content.splitlines()
 
@@ -77,6 +71,8 @@ class Brain:
             if not "> " in line:
                 line.replace(">", "> ")
             
+            new_chats.append({"role": "assistant", "content": line})
+
             # Else line is a command
             command = line.split(" ")
             
@@ -202,8 +198,9 @@ class Brain:
                     new_chats.append({"role": "system", "content": f"lights in room {command[3]} set to color {command[2]}"})
 
             elif command[1] == "control_music":
+                self.music_controller.control_music(command[2:])
                 new_chats.append({"role": "system", "content": f"Setting music to {' '.join(command[2:])}"})
-                parsed_lines.append({"role": "music", "content": " ".join(command[2:]) })
+                parsed_lines.append({"role": "system", "content": f"Setting music to {' '.join(command[2:])}"})
 
             elif command[1] == "set_alarm_static": 
                 print(command)
