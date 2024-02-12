@@ -14,7 +14,7 @@ from config.config_variables import api_credentials
 openai.api_key = api_credentials["openai"]["key"]
 
 class MusicController:
-    def __init__(self):
+    def __init__(self, shuffle=True, loop=True, album=None, artist=None, playlist=None):
         # The psutil process running ffplay
         self.music_player = None
         
@@ -42,7 +42,9 @@ class MusicController:
         self.played_list = []
         self.available_songs = []
 
-        threading.Thread(target=self.music_loop, name="music_loop").start()
+        threading.Thread(target=self.music_loop, name="music_loop", 
+            kwargs={"shuffle": shuffle, "loop": loop, "album": album, "artist": artist, "playlist": playlist}
+        ).start()
         threading.Thread(target=self.lyric_loop, name="lyric_loop").start()
         
         signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -263,6 +265,12 @@ class MusicController:
 
         return f"Unknown command: {command}"
 
+def stable_hash(text:str):
+    hash=0
+    for ch in text:
+        hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFF
+    return hash
+
 class MusicSetup:
     def __init__(self):
         pass
@@ -304,17 +312,24 @@ class MusicSetup:
                     "songs": []
                 }
                 
-                album_hash = str(hash(album))
+                album_hash = str(stable_hash(album))
                 
                 song_list = next(os.walk(f"./music/music_library/{artist}/{album}"))[2]
                 for song in song_list:
                     song_name = song.replace(".mp3", album_hash)
                     song_link = f"./music/music_library/{artist}/{album}/{song}"
 
-                    args = ("ffprobe","-show_entries", "format=duration", "-i", song_link)
-                    popen = subprocess.Popen(args, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-                    popen.wait()
-                    output = popen.stdout.read()
+                    duration = ""
+                    
+                    if song_name in old_songs.keys():
+                        duration = old_songs[song_name]["duration"]
+                    else:
+                        args = ("ffprobe","-show_entries", "format=duration", "-i", song_link)
+                        popen = subprocess.Popen(args, stdout=subprocess.PIPE, stdin=subprocess.PIPE)#, stderr=subprocess.PIPE)
+                        popen.wait()
+                        output = popen.stdout.read()
+
+                        duration = duration_re.search(str(output)).group(0)
 
                     artists[artist]["songs"].append(song_name)
                     albums[album]["songs"].append(song_name)
@@ -324,10 +339,10 @@ class MusicSetup:
                         "album": album,
                         "artist": artist,
                         "link": song_link,
-                        "duration": duration_re.search(str(output)).group(0)
+                        "duration": duration
                     }
 
-                    if song_name in old_songs.keys():
+                    if song_name in old_songs.keys() and "lyrics" in old_songs[song_name].keys():
                         songs[song_name]["lyrics"] = old_songs[song_name]["lyrics"]
 
         with open("music/artists.json", 'w') as fp:
@@ -373,7 +388,6 @@ class MusicSetup:
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-import webbrowser
 
 scopes = [
     "user-read-playback-state",

@@ -1,3 +1,15 @@
 */config_variables.py
 */__pycache__
 */music_library/
+*/music_library/
+/intent_cache
+transceivers.py
+/__pycache__
+package.json
+package-lock.json
+dictate.wav
+.cache
+albums.json
+artists.json
+playlists.json
+songs.json
