@@ -98,7 +98,11 @@ class KasaController:
         with open("functions/smart_devices.json", 'w') as f:
             json.dump(json_data, f)
 
-    async def set_plug(self, name="", on=""):
+    def set_plug(self, name="", on=""):
+        self.loop.run_until_complete(self.set_plug_async(name=name, on=on))
+        return (200, "Success")
+
+    async def set_plug_async(self, name="", on=""):
         name = name.lower().replace(" ", "_")
 
         closest_name = process.extractOne(name, self.devices.keys())
@@ -115,7 +119,11 @@ class KasaController:
         elif on == "off":
             await device.turn_off()
 
-    async def set_room(self, name="", on="", brightness="", color=""):
+    def set_room(self, name="", on="", brightness="", color=""):
+        self.loop.run_until_complete(self.set_room_async(name=name, on=on, brightness=brightness, color=color))
+        return (200, "Success")
+
+    async def set_room_async(self, name="", on="", brightness="", color=""):
         name = name.lower().replace(" ", "_")
 
         closest_name = process.extractOne(name, self.rooms.keys())
@@ -127,6 +135,9 @@ class KasaController:
 
         for bulb in self.rooms[closest_name[0]]:
             await bulb.update()
+
+            if on == "off":
+                await bulb.turn_off()
             
             if color in colors.keys():
                 if brightness:
@@ -139,14 +150,14 @@ class KasaController:
 
             if on == "on":
                 await bulb.turn_on()
-            elif on == "off":
-                await bulb.turn_off()
             
             await bulb.update()
-
-            return (200, "Success")
         
-    async def adjust_room_brightness(self, name="", dir="", brightness=20):
+    def adjust_room_brightness(self, name="", dir="", brightness=20):
+        self.loop.run_until_complete(self.adjust_room_brightness_async(name=name, dir=dir, brightness=brightness))
+        return (200, "Success")
+    
+    async def adjust_room_brightness_async(self, name="", dir="", brightness=20):
         name = name.lower().replace(" ", "_")
 
         if not name in self.rooms.keys():
@@ -163,9 +174,10 @@ class KasaController:
             await bulb.set_brightness( bulb.brightness + brightness )
             await bulb.update()
 
-        return (200, "Success")
-    
-    async def alert(self, room:str, color:str):
+    def alert(self, room:str, color:str):
+        self.loop.run_until_complete(self.alert_async(room, color))
+
+    async def alert_async(self, room:str, color:str):
         old_state = []
         for bulb in self.rooms[room]:
             await bulb.update()

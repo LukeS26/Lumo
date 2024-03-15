@@ -30,7 +30,8 @@ longitude = 0
 assistant_mode = "calibrate"
 
 enabled_features = {
-    "self_host_whisper": False
+    "self_host_whisper": False,
+    "self_host_llm": False
 }
 
 # imperial or metric

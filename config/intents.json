@@ -1,0 +1,135 @@
+[
+    {
+        "intent": "negative",
+        "examples": [
+            "Hey Lumo!",
+            "What's your favorite (song|color)?",
+            "How are you?",
+            "What do you know about the moon?",
+            "please",
+            "thanks",
+            "I'll be gone for a little while",
+            "I'm not going to use them for a bit",
+            "Should I do that?",
+            "Lets play a game",
+            "Can we play a game?"
+        ]
+    },
+    {
+        "intent": "get_time",
+        "examples": [
+            "What time is it?",
+            "Can you check the time please?",
+            "What's the time?",
+            "Can you tell me the time?",
+            "Hey, can you let me know the time?",
+            "Can you check the time (|for me(please|))?"
+        ]
+    },
+    {
+        "intent": "get_date",
+        "examples": [
+            "What day is it?",
+            "Can you check the date please?",
+            "What('s (today|the date)|day is it)?",
+            "Can you tell me the date?",
+            "Hey, can you let me know the date?"            
+        ]
+    },
+    {
+        "intent": "get_weather",
+        "examples": [
+            "What is the weather like today?",
+            "Can you check (if|when) it will rain today?",
+            "Check the weather please",
+            "Can you check the weather?",
+            "Is it (going|supposed) to (rain|snow|hail|sleet) (today|anytime|soon|anytime soon)?",
+            "Will it be (hot|cold|rainy|sunny|cloudy|snowy|misty) (tomorrow|today|next week)?",
+            "How (cold|hot) will it be later?",
+            "What's the chance of (rain|snow|sun|clouds) (later|today|tomorrow|friday)",
+            "(Can you|) tell me the weather"
+        ]
+    },
+    {
+        "intent": "search_web",
+        "examples": [
+            "Can you look up {query} please?",
+            "Can you search for {query}?",
+            "(Look up|Search|Google) {query}",
+            "Search (the web|google|online) for {query}"
+        ]
+    },
+    {
+        "intent": "set_lights",
+        "examples": [
+            "Hey, can you switch the lights to {state}?",
+            "Could you adjust {room}'s lighting to {state}?",
+            "Turn {state} the lights in {room}",
+            "Do you mind setting the lights in {room} to {state}?",
+            "Can you toggle the {room} lights {state}?",
+            "Would you modify the lighting in {room} to {state}?",
+            "Please change the lights to {state}",
+            "I'd like to adjust the {room} lighting to {state}",
+            "Switch {room} lights to {state}",
+            "Toggle the lights in {room} {state}",
+            "Change the illumination in {room} to {state}",
+            "Can you power {state} the lights in {room}?",
+            "Would you switch the lights to {state}?",
+            "Please turn {state} the {room} lights",
+            "Can you turn {state} the lights please?",
+            "Can you (make | set | turn) the lights {state}",
+            "Would you mind turning {state} the lights?",
+            "Do you mind making the lights {state}?"
+        ]
+    },
+    {
+        "intent": "make_picture",
+        "examples": [
+            "Can you make me a picture of {prompt}?",
+            "Could you (draw | paint | generate) me a photo of {prompt} please?",
+            "Make me a picture of {prompt}, thanks.",
+            "Can you (make | paint | draw) me (something | a picture | a photo)?",
+            "Would you mind (making | drawing | generating | desiging | producing) a (picture | drawing | photo | image) (for me | of {prompt})?"
+        ]
+    },
+    {
+        "intent": "pause_music",
+        "examples": [
+            "Can you {pause} the music?",
+            "Are you able to {pause} the music?",
+            "Hey, {pause} the music please.",
+            "Please {pause} the music.",
+            "{pause} the music, thanks.",
+            "{pause} please.",
+            "Hey, {pause}."
+        ]
+    },
+    {
+        "intent": "skip_music",
+        "examples": [
+            "Skip {direction} songs.",
+            "Can you go {direction} songs?",
+            "Skip the {direction} song.",
+            "Go to the next song."
+        ]
+    },
+    {
+        "intent": "find_song",
+        "examples": [
+            "Can you play {song}?",
+            "Put on {song}",
+            "Do you mind playing {song}?",
+            "Would you mind putting on {song}"
+        ]
+    },
+    {
+        "intent": "find_nearby_locations",
+        "examples": [
+            "Are there any {location} nearby?",
+            "Can you (look for|find) (near|close|nearby) {location}?",
+            "Would you mind (looking for|finding) nearby {location}?",
+            "Find (close|near|nearby) {location}.",
+            "Can you (look for|find) {location} (nearby|near me)"
+        ]
+    }
+]

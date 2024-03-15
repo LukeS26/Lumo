@@ -23,7 +23,7 @@
     },
     {
         "name": "get_time",
-        "description": "Fetches and displays the current time at the users location by default, or at a specific location otherwise",
+        "description": "Fetches and displays the current time at the specified location.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -31,11 +31,9 @@
                     "description": "The location to fetch time for"
                 }
             },
-            "required": []
+            "required": ["location"]
         },
         "example": [
-            {"user": "What time is it?"},
-            {"assistant": "Let me check for you.\n> get_time"},
             {"user": "Thank you, now can you check the time in london?"},
             {"assistant": "No problem, let me check\n> get_time London"}
         ]

@@ -1,76 +1,76 @@
 example conversation:
 
-user: What time is it?
+user @ Wed 2024-03-06 15:21:20 EST: Hello Lumo, how are you?
 
-assistant: Let me check for you.
+assistant: I'm doing well, thank you for asking. How can I assist you today?
 
-> get_time
+user @ Wed 2024-03-06 15:23:51 EST: What time is it?
 
-user: Thank you, now can you check the time in london?
+assistant: It's currently 3:23 pm.
 
-assistant: No problem, let me check
+user @ Wed 2024-03-06 15:24:08 EST: And what time is it in London?
 
-> get_time London
+assistant: > get_time London
 
-user: And what is the weather today?
+user @ Wed 2024-03-06 16:42:43 EST: And what is the weather today?
 
 > get_weather today
 
-user: Wow, it seems cold today, what is it like in Puerto Rico?
+user @ Wed 2024-03-06 16:43:10 EST: Wow, it seems cold today, what is it like in Puerto Rico?
 
 assistant: Let me check.
 
 > get_weather "todays forecast" "Puerto Rico"
 
-user: Thats warm, can you set a reminder for tomorrow to pack shorts?
+user @ Wed 2024-03-06 16:42:43 EST: Thats warm, can you set a reminder for tomorrow to pack shorts?
 
 assistant: Certainly, here you go.
 
 > set_reminder_relative "Pack Shorts" 24
 
-user: Oh, and can you also send a text to my mom to ask her to buy me a new swimsuit?
+user @ Wed 2024-03-06 16:42:43 EST: Oh, and can you also send a text to my mom to ask her to buy me a new swimsuit?
 
 assistant: No problem, what do you want the message to say?
 
-user: Just write it for me please
+user @ Wed 2024-03-06 16:42:43 EST: Just write it for me please
 
 assistant: Sure, I will send a message saying "Hey Mom, USER wants to know if you can buy him a new swimsuit when you're free." Do you want to modify that?
 
-user: Nope, sounds good thanks.
+user @ Wed 2024-03-06 16:42:43 EST: Nope, sounds good thanks.
 
 assistant: No problem
 
 > send_text mom "Hey Mom, USER wants to know if you can buy him a new swimsuit when you're free."
 
-user: can you set an alarm
+user @ Wed 2024-03-06 16:42:43 EST: can you set an alarm
 
 assistant: Of course, I can help you set an alarm. What time would you like the alarm to be set for?
 
-user: 3 am
+user @ Wed 2024-03-06 16:42:43 EST: 3 am
 
 assistant: Sure, I can set an alarm for 3 am. Should this alarm repeat on any specific days, or is it a one-time alarm?
 
-user: Every weekend
+user @ Wed 2024-03-06 16:42:43 EST: Every weekend
 
 assistant: > set_alarm_static 0300 "Saturday Sunday"
 
-user: can you find me some restaurants nearby?
+user @ Wed 2024-03-06 16:42:43 EST: can you find me some restaurants nearby?
 
 assistant: No problem, let me search for you.
 
 > find_nearby_locations restaurant
 
-user: can you make an image of a cat with sunglasses for me?
+user @ Wed 2024-03-06 16:42:43 EST: can you make an image of a cat with sunglasses for me?
 
 assistant: Sure, let me generate it for you.
 
 > generate_image "Cat wearing sunglasses"
 
-user: can you also set an alarm 4 hours from now?
+user @ Wed 2024-03-06 16:42:43 EST: can you also set an alarm 4 hours from now?
 
 assistant: No problem, would you like that to repeat?
 
-user: no, just the one time
+user @ Wed 2024-03-06 16:42:43 EST: no, just the one time
 
 assistant: > set_alarm_relative 4
 

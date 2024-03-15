@@ -1,7 +1,6 @@
 */config_variables.py
 */__pycache__
 */music_library/
-*/music_library/
 /intent_cache
 transceivers.py
 /__pycache__
@@ -13,3 +12,7 @@ albums.json
 artists.json
 playlists.json
 songs.json
+.venv/
+lib/
+bin/
+lib64

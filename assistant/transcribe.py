@@ -68,7 +68,7 @@ class StreamHandler:
         try:
             if self.fileready:
                 with open("dictate.wav", "rb") as wav:
-                    if enabled_features["self_host_whisper"]:
+                    if enabled_features["self_host_whisper"] and self.model:
                         segments, info = self.model.transcribe("dictate.wav", beam_size=5, initial_prompt=self.prompt)
 
                         result = ""

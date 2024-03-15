@@ -8,11 +8,14 @@ import openai
 import os
 import time
 import whisper_timestamped as whisper
+from thefuzz import fuzz
 
 from config.config_variables import api_credentials
 
 openai.api_key = api_credentials["openai"]["key"]
 
+
+#TODO: Add support for MPD, and potentially MPRIS
 class MusicController:
     def __init__(self, shuffle=True, loop=True, album=None, artist=None, playlist=None):
         # The psutil process running ffplay
@@ -60,7 +63,7 @@ class MusicController:
     # Gets the current playback time through the song. 
     # To do so it takes the current time since the creation of the music player, and subtracts the amount of time it has been paused
     # If the music is paused, then it uses the time it was paused at, instead of the current time, since in that case it won't be playing
-    def get_play_time(self):
+    def get_current_play_time(self):
         if self.music_player is None:
             return 0
 
@@ -69,6 +72,9 @@ class MusicController:
         else:
             return (time.time() - self.music_player.create_time()) - self.pause_time + self.seek_start
 
+    def get_current_duration(self):
+        return float(self.songs[self.get_current_song()]["duration"])
+
     # Method to check if the music_process isn't running. If the music process doesn't exist it also returns True
     def is_paused(self):
         return self.paused
@@ -76,6 +82,18 @@ class MusicController:
     # Shortcut to return the id of the currently playing song
     def get_current_song(self):
         return self.played_list[self.current_song]
+
+    def get_current_song_name(self):
+        return self.songs[self.get_current_song()]["name"]
+
+    def get_current_song_artist(self):
+        return self.songs[self.get_current_song()]["artist"]
+
+    def toggle_pause(self):
+        if self.paused:
+            self.unpause()
+        else:
+            self.pause()
 
     # Suspends the process, and tracks the time at which it was paused for calculating play time
     def pause(self):
@@ -111,7 +129,17 @@ class MusicController:
 
         self.player_lock = True
     
-        seek_time = min(max(0, self.get_play_time() + seconds), float(self.songs[self.get_current_song()]["duration"]))
+        seek_time = min(max(0, self.get_current_play_time() + seconds), float(self.songs[self.get_current_song()]["duration"]))
+
+        self.play(seek_time=seek_time)
+
+    def seek_to(self, seconds):
+        if self.player_lock:
+            return
+
+        self.player_lock = True
+
+        seek_time = min(max(0, seconds), float(self.songs[self.get_current_song()]["duration"]))
 
         self.play(seek_time=seek_time)
 
@@ -140,7 +168,30 @@ class MusicController:
             stderr=subprocess.PIPE
         ).pid)
 
-        print(f"Now playing {self.songs[self.get_current_song()]['name']} by {self.songs[self.get_current_song()]['artist']}" )
+        print(f"Now playing {self.songs[self.get_current_song()]['name']} by {self.songs[self.get_current_song()]['artist']}")
+
+    def find_song(self, song_name):
+        best_ratio = 70
+        best_id = None
+
+        for song_id in self.songs.keys():
+            cur_best_ratio = fuzz.ratio(self.songs[song_id]["name"], song_name)
+
+            if cur_best_ratio > best_ratio:
+                best_ratio = cur_best_ratio
+                best_id = song_id
+
+        return best_id
+
+    def add_song_to_queue(self, song_id):
+        if not song_id in self.songs.keys():
+            return
+
+        self.played_list.insert(self.current_song + 1, song_id)
+
+        if len(self.played_list) > (len(self.available_songs) + len(self.used_songs)):
+            self.played_list.pop(0)
+            self.current_song -= 1
 
     # Method to calculate the song to play, based on how many forward or backwards it wants to go.
     # if the new index would be above the length of the play list, it adds new songs to that list, and sets itself to the last index
@@ -170,7 +221,7 @@ class MusicController:
         self.played_list.append(self.available_songs[picked_song])
         self.available_songs.pop(picked_song)
 
-        if len(self.played_list) > (len(self.available_songs) + len(self.used_songs)) :
+        if len(self.played_list) > (len(self.available_songs) + len(self.used_songs)):
             self.played_list.pop(0)
             self.current_song -= 1
 
@@ -192,7 +243,10 @@ class MusicController:
             except:
                 print(f"Artist {artist} not found!")
         elif playlist:
-            pass
+            try:
+                self.available_songs = self.playlists[playlist]["songs"]
+            except:
+                print(f"Playlist {playlist} not found!")
         else:
             self.available_songs = list(self.songs.keys())
 
@@ -211,7 +265,7 @@ class MusicController:
         if "lyrics" not in self.songs[current_song].keys():
             return (-1, "")
 
-        cur_play_time = self.get_play_time()
+        cur_play_time = self.get_current_play_time()
         possible_lyrics = self.songs[current_song]["lyrics"]
 
         for i, (_, lyric_time) in enumerate(possible_lyrics):
@@ -240,7 +294,7 @@ class MusicController:
 
     def control_music(self, command):
         if  "pause" in command or "stop" in command:
-            self.pause()()
+            self.pause()
             return f"Music paused. Current song: {self.songs[self.get_current_song()]['name']}"
         elif "unpause" in command or "resume" in command or "play" in command:
             self.unpause()
@@ -283,23 +337,34 @@ class MusicSetup:
         songs = {}
 
         old_songs = json.load(open("./music/songs.json"))
+        old_albums = json.load(open("./music/albums.json"))
+        old_artists = json.load(open("./music/artists.json"))
 
         artist_list = next(os.walk("./music/music_library"))[1]
         
         for artist in artist_list:
-            tags = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": f"Create a list of tags for the band {artist}, seperated by ', '"}])
+            tags = ""
+            similar_bands = ""
 
-            similar_bands = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[
-                {"role": "system", "content": f"{artist_list}"},
-                {"role": "system", "content": f"Create a list of bands from the provided list that are similar to {artist}, seperated by ', '"}    
-            ])
+            if artist in old_artists.keys():
+                tags = old_artists[artist]["tags"]
+                similar_bands = old_artists[artist]["similar_to"]
+            else:
+                tags = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": f"Create a list of tags for the band {artist}, seperated by ', '"}])
+                tags = tags.choices[0].message.content.split(", ")
+
+                similar_bands = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[
+                    {"role": "system", "content": f"{artist_list}"},
+                    {"role": "system", "content": f"Create a list of bands from the provided list that are similar to {artist}, seperated by ', '"}    
+                ])
+                similar_bands = similar_bands.choices[0].message.content.split(", ")
 
             artists[artist] = {
                 "name": artist,
                 "albums": [],
                 "songs": [],
-                "tags": tags.choices[0].message.content.split(", "),
-                "similar_to": similar_bands.choices[0].message.content.split(", ")
+                "tags": tags,
+                "similar_to": similar_bands
             }
 
             album_list = next(os.walk(f"./music/music_library/{artist}"))[1]
