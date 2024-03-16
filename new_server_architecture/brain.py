@@ -93,13 +93,11 @@ class Brain:
             
             if command[1] == "get_time":
                 if len(command) == 2:
-                    print("GET_TIME")
                     result = {"role": "system", "content": assistant_functions.get_time()}
                     parsed_lines.append( result )
                     self.saved_chats[user].append(result)
 
                 if len(command) == 3:
-                    print("GET_TIME")
                     result = {"role": "system", "content": assistant_functions.get_time_at(command[2])}
                     parsed_lines.append( result )
                     self.saved_chats[user].append(result)
@@ -152,7 +150,6 @@ class Brain:
                     self.saved_chats[user].append({"role": "system", "content": f"lights in room {command[3]} switched {command[2]}"})
 
             elif command[1] == "room_light_toggle":
-                print(command)
                 if len(command) == 3:
                     self.smart_hub.set_room(name=room_name, on=command[2])
                     self.saved_chats[user].append({"role": "system", "content": f"lights in room {room_name} switched {command[2]}"})
@@ -162,7 +159,6 @@ class Brain:
                     self.saved_chats[user].append({"role": "system", "content": f"lights in room {command[3]} switched {command[2]}"})
 
             elif command[1] == "room_light_brightness":
-                print(command)
                 if len(command) == 3:
                     self.smart_hub.set_room(name=room_name, brightness=command[2])
                     self.saved_chats[user].append({"role": "system", "content": f"lights in room {room_name} set to brightness {command[2]}"})
@@ -172,7 +168,6 @@ class Brain:
                     self.saved_chats[user].append({"role": "system", "content": f"lights in room {command[3]} set to brightness {command[2]}"})
 
             elif command[1] == "room_light_brightness_adjust":
-                print(command)
                 if len(command) == 3:
                     self.smart_hub.adjust_room_brightness(name=room_name, dir=command[2])
                     self.saved_chats[user].append({"role": "system", "content": f"lights in room {room_name} adjusted {command[2]} by default (20)"})
@@ -190,7 +185,6 @@ class Brain:
                     self.saved_chats[user].append({"role": "system", "content": f"lights in room {command[4]} adjusted {command[2]} by {command[3]}"})
 
             elif command[1] == "room_light_color":
-                print(command)
                 if len(command) == 3:
                     self.smart_hub.set_room(name=room_name, color=command[2])
                     self.saved_chats[user].append({"role": "system", "content": f"lights in room {room_name} set to color {command[2]}"})
@@ -229,7 +223,6 @@ class Brain:
                     self.saved_chats[user].append(result)
 
             else:
-                # print(command)
                 result = {"role": "assistant", "content": line}
                 parsed_lines.append(result)
                 self.saved_chats[user].append(result)
