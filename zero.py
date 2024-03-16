@@ -8,6 +8,8 @@ import json
 from music.music import MusicController
 from new_server_architecture.assistant import Assistant
 
+from config.config_variables import assistant_mode
+
 def stable_hash(text:str):
     hash=0
     for ch in text:
@@ -28,7 +30,7 @@ class Server:
 
         self.get_lumo_hub()
 
-        self.assistant = Assistant(mode="audio", voice="lumo", room=room, server=self.lumo_hub)
+        self.assistant = Assistant(mode=assistant_mode, voice="lumo", room=room, server=self.lumo_hub)
 
         # self.app.route("/control_music", methods=['POST'])(self.control_music)
 
@@ -59,7 +61,7 @@ class Server:
                     parsed_response = response.split(",")
 
                     if parsed_response[0] == "LumoFound":
-                        self.lumo_hub = f"{addr}:{parsed_response[1]}"
+                        self.lumo_hub = f"{addr[0]}:{parsed_response[1]}"
                     
                 except socket.timeout:
                     break  # No more responses

@@ -42,7 +42,7 @@ class Server:
         self.app.run(host="0.0.0.0", port=self.port)
 
     def process_request(self):
-        return self.brain.make_request(request.form.get("message"), request.form.get("room"), request.form.get("user"))
+        return {"response": self.brain.make_request(request.form.get("message"), request.form.get("room"), request.form.get("user"))}
 
     def get_all_devices(self, broadcast_ip="255.255.255.255", port=31415, timeout=2):
         buffer_size = 1024
@@ -105,7 +105,3 @@ class Server:
             
 if __name__ == "__main__":
     hub = Server()
-
-    while True:
-        print(hub.device_list)
-        time.sleep(5)
