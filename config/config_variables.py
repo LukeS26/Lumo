@@ -21,6 +21,10 @@ api_credentials = {
     "google": {
         "search_key": "",
         "map_key": ""
+    },
+    "spotify": {
+        "client_id": "",
+        "client_secret": ""
     }
 }
 
