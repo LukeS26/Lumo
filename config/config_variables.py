@@ -41,6 +41,8 @@ enabled_features = {
 # imperial or metric
 measurement_units = "imperial"
 
+phone_number = "+11234567890"
+
 contacts = {
-    "name": "+11111111111"
+    "number": ["name"]
 }

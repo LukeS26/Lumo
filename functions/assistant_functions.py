@@ -68,16 +68,10 @@ def send_text(twilio_client, contact_name, message):
     try:
         contact_name = contact_name.lower()
         
-        if not contact_name in contacts:
+        if not contact_name in twilio_client.contact_list:
             return f"It appears there is no contact in your phone by the name of {contact_name}, would you like to send the message to a different person?"
 
-        message = twilio_client.messages.create(
-            from_='+18334970620',
-            body="\n".join(message.splitlines()),
-            to=f'+1{contacts[contact_name]}'
-        )
-
-        print(message.sid)
+        twilio_client.send_text(contact_name, message)
 
         return f"Just sent the text message to {contact_name}, is there anything else you would like me to do?"
     except Exception as e:
@@ -194,28 +188,6 @@ def generate_image(prompt):
     except:
         playsound('./error handling audio/ElevenLabs_generateImage.mp3')
         return [f"Could not generate image with prompt {prompt}"]
-
-def generate_image_message(prompt):
-    try:
-        image = openai.images.generate(
-            prompt=prompt,
-            n=1,
-            size="1024x1024",
-            response_format="b64_json",
-            model="dall-e-3",
-            quality="standard",
-            style="vivid"
-        )
-
-        image_data = b64decode(image["data"][0]["b64_json"])
-        image_file = f"static/images/{prompt[:32].replace(' ', '_')}{image['created']}.png"
-        with open(image_file, mode="wb") as png:
-            png.write(image_data)
-
-        return image_file
-    except:
-        playsound('./error handling audio/ElevenLabs_generateImageMessage.mp3')
-        return
 
 def search_web(query):
     try:

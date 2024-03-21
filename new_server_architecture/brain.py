@@ -33,15 +33,33 @@ class Brain:
 
         self.music_controller = None
         self.smart_hub = SmartDeviceHub()
-        self.twilio_client = twilio.Client(api_credentials["twilio"]["sid"], api_credentials["twilio"]["auth_token"])
+        self.twilio_client = None
 
     def clear_chat(self, user):
         while len(self.saved_chats[user]) > self.last_system_chat:
             self.saved_chats[user].pop(self.last_system_chat)
 
+    def append_message(self, messageBody, role, user):
+        if user is None:
+            user = "unknown"
+        
+        user = user.title()
+
+        if not user in self.saved_chats.keys():
+            self.saved_chats[user] = self.inital_chats
+
+        if role == "user":
+            formattedDatetime = strftime("%a %Y-%m-%d %H:%M:%S", localtime())
+
+            self.saved_chats[user].append( {"role": "user", "content": f"{user} @ {formattedDatetime} EST: {messageBody}"} )
+        else:
+            self.saved_chats[user].append( {"role": role, "content": messageBody} )
+
     def make_request(self, messageBody, room_name, user):
         if user is None:
-            user = "Unknown"
+            user = "unknown"
+        
+        user = user.title()
 
         if not user in self.saved_chats.keys():
             self.saved_chats[user] = self.inital_chats

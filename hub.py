@@ -4,9 +4,12 @@ import requests
 import threading, signal
 import time
 import json
+from pyngrok import ngrok
+
 
 from new_server_architecture.brain import Brain
-from music.music import MusicController
+from new_server_architecture.mpd_handler import MPDHandler
+from new_server_architecture.twilio_controller import TwilioController
 
 def stable_hash(text:str):
     hash=0
@@ -26,23 +29,43 @@ class Server:
         
         self.brain = Brain()
 
-        # self.music_controller = MusicController()
-        
+        self.mpd_handler = MPDHandler()
+        self.twilio_handler = TwilioController(self.brain)
+
+        self.brain.twilio_client = self.twilio_handler
+
         self.is_online = True
 
         self.get_all_devices()
 
         self.app.route("/make_request", methods=['POST'])(self.process_request)
+        self.app.route("/control_music_playback", methods=['POST'])(self.control_mpd_playback)
+        self.app.route("/sms", methods=['POST'])(self.handle_sms)
 
         threading.Thread(target=self.listen_for_devices, name="lumo_listener").start()
         threading.Thread(target=self.heartbeat, name="heartbeat_thread").start()
 
         signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+        url = ngrok.connect(self.port, domain="remarkably-immortal-calf.ngrok-free.app").public_url
+        print(' `* Tunnel URL:', url)
+
+        self.twilio_handler.update_url(url)
+
         self.app.run(host="0.0.0.0", port=self.port)
 
     def process_request(self):
         return {"response": self.brain.make_request(request.form.get("message"), request.form.get("room"), request.form.get("user"))}
+
+    #Endpoint is only needed for eventual webpage/phone apps
+    def control_mpd_playback(self):
+        pass
+
+    def handle_sms(self):
+        resp = self.twilio_handler.respond_to_text(request)
+        if resp:
+            return resp
+        return ""
 
     def get_all_devices(self, broadcast_ip="255.255.255.255", port=31415, timeout=2):
         buffer_size = 1024
@@ -52,7 +75,7 @@ class Server:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         sock.settimeout(timeout)
 
-        message = f"LumoZeroDiscover"
+        message = f"LumoZeroDiscover,{self.port}"
 
         try:
             sock.sendto(message.encode(), (broadcast_ip, port))

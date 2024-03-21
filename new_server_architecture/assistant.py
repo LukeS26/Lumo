@@ -1,5 +1,6 @@
 import asyncio
 import elevenlabs
+from elevenlabs.client import ElevenLabs
 from datetime import datetime, timedelta
 import requests
 import threading, signal
@@ -14,8 +15,10 @@ assistant_voice = {
     "lumo": "PWVNbNOu8k3hfTOGzHaX"
 }
 
+elevenlabs_client = ElevenLabs(api_key=api_credentials["elevenlabs"]["key"])
+
 class Assistant:
-    def __init__(self, mode="audio", voice="lumo", room="bedroom", server=None):
+    def __init__(self, mode="audio", voice="lumo", room="none"):
         self.live_transcribe = transcribe.StreamHandler()
         self.mode = mode
         self.last_valid_request = None
@@ -24,13 +27,15 @@ class Assistant:
             settings=elevenlabs.VoiceSettings(stability=0.71, similarity_boost=0.5, style=0.0, use_speaker_boost=True)
         )
         self.room = room
-        self.server_ip = server
 
         self.gui = None
 
         threading.Thread(target=self.start).start()
 
         signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    def set_server(self, server):
+        self.server_ip = f"{server[0]}:{server[1]}"
 
     def start(self):
         if self.mode == "calibrate":
@@ -49,11 +54,10 @@ class Assistant:
         # self.gui.send_response(text)
 
         if self.mode in ["read", "audio", "calibrate"]:
-            audio = elevenlabs.generate(
+            audio = elevenlabs_client.generate(
                 text=text,
                 voice=self.voice,
-                model="eleven_multilingual_v2",
-                api_key=api_credentials["elevenlabs"]["key"]
+                model="eleven_multilingual_v2"
             )
             
             elevenlabs.play(audio)
