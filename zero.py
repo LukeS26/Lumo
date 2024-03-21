@@ -8,13 +8,7 @@ import json
 from music.music import MusicController
 from new_server_architecture.assistant import Assistant
 
-from config.config_variables import assistant_mode
-
-def stable_hash(text:str):
-    hash=0
-    for ch in text:
-        hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFF
-    return hash
+from config.config_variables import assistant_mode, room
 
 class Server:
     def __init__(self, room):
@@ -23,14 +17,12 @@ class Server:
         self.lumo_hub = None
 
         self.room = room
-        
-        self.music_controller = MusicController()
-        
+                
         self.is_online = True
 
-        self.get_lumo_hub()
+        self.assistant = Assistant(mode=assistant_mode, voice="lumo", room=room)
 
-        self.assistant = Assistant(mode=assistant_mode, voice="lumo", room=room, server=self.lumo_hub)
+        self.get_lumo_hub()
 
         # self.app.route("/control_music", methods=['POST'])(self.control_music)
 
@@ -61,7 +53,8 @@ class Server:
                     parsed_response = response.split(",")
 
                     if parsed_response[0] == "LumoFound":
-                        self.lumo_hub = f"{addr[0]}:{parsed_response[1]}"
+                        self.lumo_hub = (addr[0], parsed_response[1])
+                        self.assistant.set_server(self.lumo_hub)
                     
                 except socket.timeout:
                     break  # No more responses
@@ -78,11 +71,12 @@ class Server:
 
         while True:
             data, addr = sock.recvfrom(buffer_size)
-            message = data.decode().split(",")
+            parsed_response = data.decode().split(",")
 
             # Check if the received message is the discovery request
-            if message[0] == "LumoZeroDiscover":
-                self.lumo_hub = addr[0]
+            if parsed_response[0] == "LumoZeroDiscover":
+                self.lumo_hub = (addr[0], parsed_response[1])
+                self.assistant.set_server(self.lumo_hub)
                 response = f"LumoFound,{self.room}"
                 sock.sendto(response.encode(), addr)
 
@@ -100,4 +94,4 @@ class Server:
             time.sleep(1)
 
 if __name__ == "__main__":
-    hub = Server("bedroom")
+    hub = Server(room=room)
