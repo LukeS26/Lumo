@@ -24,7 +24,7 @@ main_timezone = pytz.timezone("America/New_York")
 
 months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
-days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+days_of_week = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 def get_time():
     cur_moment = datetime.now(main_timezone)
@@ -100,7 +100,7 @@ def get_weather(request):
 
             day_of_week += 1
             day_of_week %= 7
-            day_as_text = days_of_week[day_of_week]
+            day_as_text = days_of_week[day_of_week].title()
         
         current_hour = datetime.now(main_timezone).hour
 
@@ -145,7 +145,7 @@ def get_weather_at(location, request):
 
             day_of_week += 1
             day_of_week %= 7
-            day_as_text = days_of_week[day_of_week]
+            day_as_text = days_of_week[day_of_week].title()
         
         current_hour = datetime.now(main_timezone).hour
 
@@ -240,7 +240,7 @@ def find_nearby_locations(location_type, location=None):
                 else:
                     for i in range(len(open_hours['opening_hours']['weekday_text'])):
                         if not "Closed" in open_hours['opening_hours']['weekday_text'][(weekday+1+i)%7]: 
-                            locations += f"Open {days_of_week[(weekday+1+i)%7]} from {open_hours['opening_hours']['weekday_text'][(weekday+1+i)%7].split(': ')[1]}"
+                            locations += f"Open {days_of_week[(weekday+1+i)%7].title()} from {open_hours['opening_hours']['weekday_text'][(weekday+1+i)%7].split(': ')[1]}"
                             break
             else:
                 if "–" in open_hours['opening_hours']['weekday_text'][weekday]: 
@@ -282,18 +282,21 @@ def set_alarm_static_at(time, repeat_days):
         hour = time // 100
         minute = time % 100
 
+        repeat_integers = []
+
         if (0 <= hour <= 23) and (0 <= minute <= 59):
             # make sure the days requested are valid
-            for day in range(len(repeat_days)):
-                if repeat_days[day] not in days_of_week:
-                    break
+            for day in repeat_days:
+                if day not in days_of_week:
+                    continue
+                repeat_integers.append(days_of_week.index(day.lower()))
 
             # make sure the alarm about to be set doesn't already exist
             for a in alarm.alarms_list:
-                if a == [hour, minute, repeat_days]:
+                if a == [hour, minute, repeat_integers]:
                     return f"Error, the alarm for {hour}:{minute} on {repeat_days} already exists"
 
-            alarm.alarms_list.append([hour, minute, repeat_days])
+            alarm.alarms_list.append([hour, minute, repeat_integers])
             alarm.update_alarms()
 
         return f"Set an alarm for {hour}:{minute} on {repeat_days}"
@@ -327,10 +330,17 @@ def remove_alarm_static_at(time, repeat_days):
         hour = time // 100
         minute = time % 100
 
+        repeat_integers = []
+
         if (0 <= hour <= 23) and (0 <= minute <= 59):
 
+            for day in repeat_days:
+                if day not in days_of_week:
+                    continue
+                repeat_integers.append(days_of_week.index(day.lower()))
+
             for a in alarm.alarms_list:
-                if a == [hour, minute, repeat_days]:
+                if a == [hour, minute, repeat_integers]:
                     alarm.alarms_list.remove(a)
                     alarm.update_alarms()  
                     return f"Removed alarm for {hour}:{minute} on {repeat_days}"
